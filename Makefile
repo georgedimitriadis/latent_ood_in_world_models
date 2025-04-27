@@ -44,7 +44,7 @@ create_data:
 train_models:
 	@echo "Train MLP on translate"
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn 100 saved_models/translate/mlp_nn data/processed/compositional_translate data/results/translate
-    @echo "Train CNN on translate"
+	@echo "Train CNN on translate"
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn 100 saved_models/translate/cnn data/processed/compositional_translate data/results/translate
 	@echo "Train Transformer on translate"
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer 100 saved_models/translate/transformer data/processed/compositional_translate data/results/translate
@@ -52,9 +52,9 @@ train_models:
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_full 100 saved_models/translate/axial_point_network_full data/processed/compositional_translate data/results/translate
 	@echo "Train Axial Pointer Linear on translate"
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_linear 100 saved_models/translate/axial_point_network_linear data/processed/compositional_translate data/results/translate
-    @echo "Train MLP on rotate"
+	@echo "Train MLP on rotate"
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn 100 saved_models/rotate/mlp_nn data/processed/compositional_rotate data/results/rotate
-    @echo "Train CNN on rotate"
+	@echo "Train CNN on rotate"
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn 100 saved_models/rotate/cnn data/processed/compositional_rotate data/results/rotate
 	@echo "Train Transformer on rotate"
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer 100 saved_models/rotate/transformer data/processed/compositional_rotate data/results/rotate
