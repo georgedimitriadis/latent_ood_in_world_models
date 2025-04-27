@@ -1,11 +1,23 @@
 import warnings
-
+import numpy as np
 import keras
 import sklearn.metrics
-
+from typing import Tuple
 activation = "relu"
 from sklearn.linear_model import Ridge
-from data.arc_data.generators.for_logic import unpack_data
+
+
+def unpack_data(result_from_create_data_from_task: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    inputs = []
+    outputs = []
+    for i, array in enumerate(result_from_create_data_from_task):
+        if np.sum(array) > 0:
+            if i % 2 == 0:
+                inputs.append(array)
+            else:
+                outputs.append(array)
+
+    return np.array(inputs), np.array(outputs)
 
 
 def predict_train_lr(dense, batch_element, encoder_flat, model_full, train):
