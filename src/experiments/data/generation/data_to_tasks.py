@@ -1,7 +1,7 @@
 
 import numpy as np
-from src.structure.canvas.canvas import Canvas
-from src.structure.task.task import Task
+from structure.canvas.canvas import Canvas
+from structure.task.task import Task
 
 
 class SavedExperimentalDataToTask:

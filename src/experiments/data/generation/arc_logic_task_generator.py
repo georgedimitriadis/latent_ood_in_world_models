@@ -8,9 +8,9 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 
-from src.structure.canvas.canvas import Canvas
-from src.structure.task.task import Task
-from src.structure.geometry.basic_geometry import Dimension2D
+from structure.canvas.canvas import Canvas
+from structure.task.task import Task
+from structure.geometry.basic_geometry import Dimension2D
 
 
 class ARCLogicTask(Task):

@@ -4,8 +4,8 @@ import math
 import random
 from typing import List
 
-from src.structure.geometry.basic_geometry import Dimension2D, Surround
-from src.structure.object.primitives import Primitive, Object, Point, Parallelogram
+from structure.geometry.basic_geometry import Dimension2D, Surround
+from structure.object.primitives import Primitive, Object, Point, Parallelogram
 
 
 def do_two_objects_overlap(object_a: Primitive | Object, object_b: Primitive | Object) -> bool:

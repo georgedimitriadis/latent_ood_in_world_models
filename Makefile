@@ -1,8 +1,4 @@
-.PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3
-
-#################################################################################
-# GLOBALS                                                                       #
-#################################################################################
+.PHONY: createdata
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BUCKET = [OPTIONAL] your-bucket-for-syncing-data (do not include 's3://')
@@ -21,32 +17,14 @@ endif
 #################################################################################
 
 
-## Make Dataset
-
-CYTHON_FILE = optimized_best_first_search.pyx
-SETUP_FILE = setup.py
-MODULE_NAME = optimized_best_first_search
-BUILD_DIR = build
-EXTENSION = $(MODULE_NAME).c
-SO_FILE = $(MODULE_NAME).so
-
 # Targets
 all: $(SO_FILE)
 
-# Rule to build the Cython extension module
-cython:
-	@echo "Building Cython module..."
-	python $(SETUP_FILE) build_ext --inplace
 
-# Clean up build artifacts
-clean:
-	@echo "Cleaning up..."
-	rm -rf $(BUILD_DIR) $(EXTENSION) $(SO_FILE)
-
-
-
-data_all_experimental:
-    CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 1000 data/processed/compositional_translate/train.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
+## Make Dataset
+createdata:
+	@echo "Making data"
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 1000 data/processed/compositional_translate/train.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_translate/test_d0.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_translate/test_d1.npz generate_compositional_datasets '{"distance":1, "symmetric_objects":1, "transformation_type": "translate"}'
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_translate/test_d2.npz generate_compositional_datasets '{"distance":2, "symmetric_objects":1, "transformation_type": "translate"}'
@@ -63,7 +41,7 @@ visualise_model:
 
 
 train_cnn:
-	CUDA_VISIBLE_DEVICES="1" KERAS_BACKEND="tensorflow" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/cnn_train_generator.py data/processed/cnn_pretrain.npz models/
+	CUDA_VISIBLE_DEVICES="1" KERAS_BACKEND="tensorflow" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_compositional_models.py data/processed/cnn_pretrain.npz models/
 viz_log:
 	 PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/vis.py
 
@@ -93,22 +71,6 @@ clean:
 ## Lint using flake8
 lint:
 	flake8 src
-
-## Upload Data to S3
-sync_data_to_s3:
-ifeq (default,$(PROFILE))
-	aws s3 sync data/ s3://$(BUCKET)/data/
-else
-	aws s3 sync data/ s3://$(BUCKET)/data/ --profile $(PROFILE)
-endif
-
-## Download Data from S3
-sync_data_from_s3:
-ifeq (default,$(PROFILE))
-	aws s3 sync s3://$(BUCKET)/data/ data/
-else
-	aws s3 sync s3://$(BUCKET)/data/ data/ --profile $(PROFILE)
-endif
 
 ## Set up python interpreter environment
 create_environment:

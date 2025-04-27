@@ -92,7 +92,7 @@ def b_acc(y_true, y_pred):
 
     return accuracy
 
-@keras.saving.register_keras_serializable(package="models.lm")
+@keras.saving.register_keras_serializable(package="saved_models.lm")
 def b_acc_s(y_true, y_pred):
     # Get the predicted class by taking the argmax along the last dimension (the class dimension)
     pred_classes = keras.ops.argmax(y_pred, axis=-1)

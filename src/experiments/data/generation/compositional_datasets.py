@@ -2,13 +2,13 @@
 from typing import List, Tuple
 import numpy as np
 
-from src.experiments.data.generation.arc_logic_task_generator import ARCLogicTask
-from src.experiments.data.generation.random_primitive_object_spawner import RandomPrimitiveInCanvas
-from src.structure.canvas.canvas import Canvas
-from src.structure.geometry.basic_geometry import Colour, Dimension2D, Orientation, Surround, Point
-from src.structure.geometry.probabilities import UniformDistribution, DistributionOver_ObjectTypes
+from experiments.data.generation.arc_logic_task_generator import ARCLogicTask
+from experiments.data.generation.random_primitive_object_spawner import RandomPrimitiveInCanvas
+from structure.canvas.canvas import Canvas
+from structure.geometry.basic_geometry import Colour, Dimension2D, Orientation, Surround, Point
+from structure.geometry.probabilities import UniformDistribution, DistributionOver_ObjectTypes
 from dsl.functions import dsl_functions as dsl
-from src.structure.object.primitives import Primitive
+from structure.object.primitives import Primitive
 
 # These are the parameters of the compositionality experiments. Currently, the colour_changes and scales parameters
 # are not used.

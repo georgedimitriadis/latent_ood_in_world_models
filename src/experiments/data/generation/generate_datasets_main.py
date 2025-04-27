@@ -14,7 +14,7 @@ import os
 import time
 
 # Import all the possible generating functions that the main can call
-from src.experiments.data.generation.compositional_datasets import generate_compositional_datasets
+from experiments.data.generation.compositional_datasets import generate_compositional_datasets
 
 NUM_OF_TASKS_IN_SAMPLE = 100
 

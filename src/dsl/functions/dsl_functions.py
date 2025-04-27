@@ -4,9 +4,9 @@ from typing import List, Tuple, Any, Type
 from itertools import combinations
 import numpy as np
 
-from src.structure.canvas.canvas import Canvas
-from src.structure.geometry.basic_geometry import Point, Vector, Dimension2D, Surround, RelativePoint, Orientation, Colour
-from src.structure.object.primitives import Primitive, Predefined, Random, Parallelogram, Cross, Hole, Pi, InverseCross, \
+from structure.canvas.canvas import Canvas
+from structure.geometry.basic_geometry import Point, Vector, Dimension2D, Surround, RelativePoint, Orientation, Colour
+from structure.object.primitives import Primitive, Predefined, Random, Parallelogram, Cross, Hole, Pi, InverseCross, \
     Dot, Angle, Diagonal, Steps, Fish, Bolt, Tie, Spiral, Pyramid, Maze
 
 

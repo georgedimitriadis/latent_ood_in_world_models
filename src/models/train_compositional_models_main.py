@@ -12,10 +12,10 @@ from dotenv import find_dotenv, load_dotenv
 from tqdm import tqdm
 from tqdm.keras import TqdmCallback
 
-from src.models.nn_models import (axial_pointer_network, pure_cnn, transformer, mlp_nn)
-from src.models.lm import b_acc_s
-from src.models.utils import make_data_from_train_sparse, plot_images_with_action
-from src.models.utils import write_dict_to_csv
+from models.nn_models import (axial_pointer_network, pure_cnn, transformer, mlp_nn)
+from models.lm import b_acc_s
+from models.utils import make_data_from_train_sparse, plot_images_with_action
+from models.utils import write_dict_to_csv
 
 
 def visualise_model(model: keras.Model, to_file: str = "./model.png"):
@@ -38,12 +38,12 @@ def visualise_images_with_action(model, X, Z, Y, logs_filepath, distance):
 @click.argument('with_language', default=False, type=click.BOOL)
 @click.argument('with_mask', default=False, type=click.BOOL)
 @click.argument('action_bits_indices', default='1', type=click.STRING)
-@click.argument('output_filepath', type=click.Path())
+@click.argument('save_model_filepath', type=click.Path())
 @click.argument('train_data_filepath', default='data/processed/compositional', type=click.Path())
 @click.argument('test_data_filepath', default='data/processed/compositional', type=click.Path())
 @click.argument('logs_filepath', default='./logs', type=click.Path())
 def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
-         output_filepath, train_data_filepath, test_data_filepath, logs_filepath):
+         save_model_filepath, train_data_filepath, test_data_filepath, logs_filepath):
     """
     Call the training of the compositional model
     :param model_type: The model type string. Can be axial_point_network_lines, axial_point_network_full, pure_cnn, transformer, mlp_nn
@@ -51,7 +51,7 @@ def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
     :param with_mask: If True then the axial point networks will create a final mask to copy stuff from a new image.
     :param num_epochs: Number of epochs
     :param action_bits_indices: The indices of the language['bits'] array values (bits) that should be used to define the action.
-    :param output_filepath: The path where the model will be saved as output_filepath/model_type.keras
+    :param save_model_filepath: The path where the model will be saved as output_filepath/model_type.keras
     :param train_data_filepath: The file path of the train data set. The full path is train_data_filepath/train.npz since it assumes the name of the train data file is train.npz
     :param test_data_filepath: The file path of the test data sets. The full paths are test_data_filepath/test_d{i}.npz since it assumes that the names of the test sets are test_d0.npz, test_d1.npz and test_d2.npz
     :param logs_filepath: The path where the log file will be saved as logs_filepath/composition_log_model_type.csv
@@ -135,7 +135,7 @@ def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
             #
 
             if ((i + 1) % 20) == 0:
-                model.save(f"{output_filepath}/{model_type}.keras")
+                model.save(f"{save_model_filepath}/{model_type}.keras")
                 visualise_images_with_action(model, X, Z, Y, logs_filepath, distance)
 
             score["epoch"] = i

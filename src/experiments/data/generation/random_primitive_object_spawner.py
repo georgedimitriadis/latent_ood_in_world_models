@@ -4,11 +4,11 @@ from typing import List, Dict, Any, Union
 
 import numpy as np
 
-from src.structure.canvas.canvas import Canvas
-from src.structure.geometry.basic_geometry import Point, Dimension2D, Colour, Surround, Surround_Percentage, Orientation
-from src.structure.geometry.probabilities import DistributionOver_ObjectTypes, DistributionOver_ObjectTransformations, \
+from structure.canvas.canvas import Canvas
+from structure.geometry.basic_geometry import Point, Dimension2D, Colour, Surround, Surround_Percentage, Orientation
+from structure.geometry.probabilities import DistributionOver_ObjectTypes, DistributionOver_ObjectTransformations, \
     UniformDistribution
-from src.structure.object.primitives import Primitive, ObjectType
+from structure.object.primitives import Primitive, ObjectType
 from dsl.functions import dsl_functions as dsl
 
 

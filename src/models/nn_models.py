@@ -5,16 +5,16 @@ import keras
 import keras_hub
 from keras import layers
 
-from src.models.nn_components import (build_encoder,
+from models.nn_components import (build_encoder,
                                   build_decoder, Patches, PatchEncoder, mlp,
                                   AttentionMappingLayer, AttentionMappingLayer2D,
                                   EmergentSymbolBindingLayer, SmoothBlendLayer,
                                   gMLPLayer, MLPMixerLayer, FNetLayer, SpatialCopyLayer)
-from src.models.utils import OneHotLayer
+from models.utils import OneHotLayer
 
 
 def pure_cnn(input_shape=(32, 32, 11), base_filters=64, encoder_filters=128, n_tasks=2):
-    # Create the models
+    # Create the saved_models
     input_z_shape = (1,)
     encoder_input = (32, 32, 11)
 
@@ -49,7 +49,7 @@ def axial_pointer_network(input_shape=(32, 32, 11), patch_size=8,
                           n_tasks=2, emb_task_dimension=128,
                           n_vocabulary=200, word_dimension=256, n_words_per_sentence=10,
                           noise=0.05):
-    # Create the models
+    # Create the saved_models
     input_z_shape = (1,)
     s_input_x = layers.Input(shape=input_shape[:2], name="x_input")
     s_input_z = layers.Input(shape=input_z_shape, name="z_input")
@@ -150,7 +150,7 @@ def transformer(input_shape=(32, 32, 11), patch_size=8, with_language: str = Fal
                 n_tasks=2, emb_task_dimension=128,
                 n_vocabulary=200, word_dimension=256, n_words_per_sentence=10,
                 noise=0.05):
-    # Create the models
+    # Create the saved_models
     input_z_shape = (1,)
 
     s_input_x = layers.Input(shape=input_shape[:2], name="x_input")
@@ -219,7 +219,7 @@ def mlp_nn(input_shape=(32, 32, 11), patch_size=8, with_language: str = False,
            n_tasks=11, emb_task_dimension=128,
            n_vocabulary=200, word_dimension=176, n_words_per_sentence=10,
            noise=0.05):
-    # Create the models
+    # Create the saved_models
     input_z_shape = (1,)
 
     s_input_x = layers.Input(shape=input_shape[:2], name="x_input")
