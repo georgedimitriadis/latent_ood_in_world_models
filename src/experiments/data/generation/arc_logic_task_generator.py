@@ -10,7 +10,6 @@ from matplotlib import pyplot as plt
 
 from structure.canvas.canvas import Canvas
 from structure.task.task import Task
-from structure.geometry.basic_geometry import Dimension2D
 
 
 class ARCLogicTask(Task):
