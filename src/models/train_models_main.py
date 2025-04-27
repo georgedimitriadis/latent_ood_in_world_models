@@ -1,7 +1,6 @@
 
 import logging
 import os.path
-from datetime import datetime
 from os.path import join
 from pathlib import Path
 
@@ -69,7 +68,6 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
     else:
         action_bits_indices = [-1]
 
-    #date_time = datetime.now().strftime("%Y%m%d-%H%M%S")
     if 'axial_point_network' in model_type:
         if 'full' in model_type:
             line_features = False
@@ -87,8 +85,9 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
     elif model_type == 'mlp_nn':
         model = mlp_nn(n_mlp_layers=4, projection_dim=32, n_tasks=2 * len(action_bits_indices),
                        with_language=with_language)
-    model.summary()
+
     model.name = model_type
+    model.summary()
     world_model = 'translate' if 'translate' in data_filepath else 'rotate'
     log_filename = f"{logs_filepath}/log_{world_model}_{model_type}.csv"
 

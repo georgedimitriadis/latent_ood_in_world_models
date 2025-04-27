@@ -42,6 +42,7 @@ create_data:
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_rotate/test_d2.npz generate_compositional_datasets '{"distance":2, "symmetric_objects":0, "transformation_type": "rotate"}'
 
 
+## Train Models
 train_models:
 	@echo "Train MLP on translate"
 	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn 100 saved_models/translate data/processed/compositional_translate data/results/translate
@@ -64,9 +65,10 @@ train_models:
 	@echo "Train Axial Pointer Linear on rotate"
 	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_linear 100 saved_models/rotate data/processed/compositional_rotate data/results/rotate
 
+
+## Create Visualisations
 visualise_model:
 	CUDA_VISIBLE_DEVICES="0" PYTHONPATH=./src KERAS_BACKEND="jax" $(PYTHON_INTERPRETER) src/visualization/visualise_model.py models/experiment/composition/axial_pointer_network.keras ./figures/models data/processed/compositional/test_d2.npz
-
 
 
 ## Delete all compiled Python files
