@@ -25,11 +25,11 @@ def visualise_model(model: keras.Model, to_file: str = "./model.png"):
                            show_trainable=False)
 
 
-def visualise_images_with_action(model, X, Z, Y, logs_filepath, distance):
+def visualise_images_with_action(model, X, Z, Y, logs_filepath, distance, epoch):
     Y_prime = model.predict(x=[X, Z])
     for j, (x, a, y, y_prime) in enumerate(list(zip(X, Z, Y, Y_prime))[:100]):
         y_prime = np.argmax(y_prime, axis=-1)
-        filename_id = f"{logs_filepath}/distance_{distance}_{j}"
+        filename_id = f"{logs_filepath}/distance_{distance}_epoch_{epoch}_image_{j}"
         plot_images_with_action(x, a, y, y_prime, filename_id)
 
 
@@ -146,7 +146,7 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
             if ((i + 1) % save_every_n_epochs) == 0:
                 model.save(f"{save_model_filepath}/{model_type}.keras")
                 if save_figures:
-                    visualise_images_with_action(model, X, Z, Y, figures_path, distance)
+                    visualise_images_with_action(model, X, Z, Y, figures_path, distance, i)
 
             score["epoch"] = i
             score["distance"] = distance
