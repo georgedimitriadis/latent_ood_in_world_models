@@ -34,7 +34,7 @@ def visualise_images_with_action(model, X, Z, Y, logs_filepath, distance):
 
 
 @click.command()
-@click.option('s', '--save_figures', is_flag=True)
+@click.option('-s', '--save_figures', is_flag=True)
 @click.argument('model_type', type=click.STRING)
 @click.argument('num_epochs', type=click.INT)
 @click.argument('save_model_filepath', type=click.Path())
