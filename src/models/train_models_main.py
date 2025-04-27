@@ -1,5 +1,6 @@
 
 import logging
+import os.path
 from datetime import datetime
 from os.path import join
 from pathlib import Path
@@ -12,7 +13,7 @@ from dotenv import find_dotenv, load_dotenv
 from tqdm import tqdm
 from tqdm.keras import TqdmCallback
 
-from models.nn_models import (axial_pointer_network, pure_cnn, transformer, mlp_nn)
+from models.nn_models import (axial_pointer_network, cnn, transformer, mlp_nn)
 from models.lm import b_acc_s
 from models.utils import make_data_from_train_sparse, plot_images_with_action
 from models.utils import write_dict_to_csv
@@ -28,33 +29,38 @@ def visualise_images_with_action(model, X, Z, Y, logs_filepath, distance):
     Y_prime = model.predict(x=[X, Z])
     for j, (x, a, y, y_prime) in enumerate(list(zip(X, Z, Y, Y_prime))[:100]):
         y_prime = np.argmax(y_prime, axis=-1)
-        filename_id = f"{logs_filepath}/figures/distance_{distance}_{j}_{model.name}"
+        filename_id = f"{logs_filepath}/distance_{distance}_{j}"
         plot_images_with_action(x, a, y, y_prime, filename_id)
 
 
 @click.command()
-@click.argument('model_type', default='axial_point_network_full', type=click.STRING)
-@click.argument('num_epochs', default=100, type=click.INT)
+@click.option('s', '--save_figures', is_flag=True)
+@click.argument('model_type', type=click.STRING)
+@click.argument('num_epochs', type=click.INT)
+@click.argument('save_model_filepath', type=click.Path())
+@click.argument('data_filepath', type=click.Path())
+@click.argument('logs_filepath', type=click.Path())
+@click.argument('save_every_n_epochs', default=20, type=click.INT)
+@click.argument('action_bits_indices', default='1', type=click.STRING)
 @click.argument('with_language', default=False, type=click.BOOL)
 @click.argument('with_mask', default=False, type=click.BOOL)
-@click.argument('action_bits_indices', default='1', type=click.STRING)
-@click.argument('save_model_filepath', type=click.Path())
-@click.argument('train_data_filepath', default='data/processed/compositional', type=click.Path())
-@click.argument('test_data_filepath', default='data/processed/compositional', type=click.Path())
-@click.argument('logs_filepath', default='./logs', type=click.Path())
-def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
-         save_model_filepath, train_data_filepath, test_data_filepath, logs_filepath):
+def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepath, save_figures,
+         save_every_n_epochs, action_bits_indices, with_language, with_mask):
     """
-    Call the training of the compositional model
-    :param model_type: The model type string. Can be axial_point_network_lines, axial_point_network_full, pure_cnn, transformer, mlp_nn
-    :param with_language: If True then use the language mechanism in the NN to generate the task index. If False no such mechanism is used.
-    :param with_mask: If True then the axial point networks will create a final mask to copy stuff from a new image.
+    Call the training of the compositional models
+    :param model_type: The model type string. Can be axial_point_network_lines, axial_point_network_full, cnn,
+                       transformer, mlp_nn
     :param num_epochs: Number of epochs
-    :param action_bits_indices: The indices of the language['bits'] array values (bits) that should be used to define the action.
     :param save_model_filepath: The path where the model will be saved as output_filepath/model_type.keras
-    :param train_data_filepath: The file path of the train data set. The full path is train_data_filepath/train.npz since it assumes the name of the train data file is train.npz
-    :param test_data_filepath: The file path of the test data sets. The full paths are test_data_filepath/test_d{i}.npz since it assumes that the names of the test sets are test_d0.npz, test_d1.npz and test_d2.npz
+    :param data_filepath: The file path of the train and test data sets.
     :param logs_filepath: The path where the log file will be saved as logs_filepath/composition_log_model_type.csv
+    :param save_figures: If True then save the figure showing the input, action, true output and network output
+    :param save_every_n_epochs: Save the network (and the figures if save_figures is True) every n epochs
+    :param action_bits_indices: The indices of the language['bits'] array values (bits) that should be used to define
+                                the action.
+    :param with_language: If True then use the language mechanism in the NN to generate the task index. If False no
+                          such mechanism is used.
+    :param with_mask: If True then the axial point networks will create a final mask to copy stuff from a new image.
     :return:
     """
 
@@ -63,7 +69,7 @@ def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
     else:
         action_bits_indices = [-1]
 
-    date_time = datetime.now().strftime("%Y%m%d-%H%M%S")
+    #date_time = datetime.now().strftime("%Y%m%d-%H%M%S")
     if 'axial_point_network' in model_type:
         if 'full' in model_type:
             line_features = False
@@ -74,8 +80,8 @@ def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
         model = axial_pointer_network(n_mlp_units=n_mlp_units, n_words_per_sentence=1,
                                       n_tasks=2 * len(action_bits_indices),
                                       with_language=with_language, with_mask=with_mask, line_features=line_features)
-    elif model_type == 'pure_cnn':
-        model = pure_cnn(base_filters=54, encoder_filters=128, n_tasks=2 * len(action_bits_indices))
+    elif model_type == 'cnn':
+        model = cnn(base_filters=54, encoder_filters=128, n_tasks=2 * len(action_bits_indices))
     elif model_type == 'transformer':
         model = transformer(n_mlp_layers=4, with_language=with_language, n_tasks=2 * len(action_bits_indices))
     elif model_type == 'mlp_nn':
@@ -83,8 +89,12 @@ def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
                        with_language=with_language)
     model.summary()
     model.name = model_type
+    world_model = 'translate' if 'translate' in data_filepath else 'rotate'
+    log_filename = f"{logs_filepath}/log_{world_model}_{model_type}.csv"
 
-    log_filename = f"{logs_filepath}/composition_log_{date_time}_{model_type}.csv"
+    figures_path = join(logs_filepath, 'figures', model_type)
+    if save_figures and not os.path.exists(figures_path):
+        Path(figures_path).mkdir(parents=True, exist_ok=True)
 
     def transform_language_bits_to_action_index(language, action_bits_indices):
         bits = [[l['bits'][i] for i in action_bits_indices] for l in language]
@@ -104,7 +114,7 @@ def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
     visualise_model(model, join(logs_filepath, model_type + '.png'))
 
     print("Loading train data...")
-    data_train = np.load(f'{train_data_filepath}/train.npz', allow_pickle=True)
+    data_train = np.load(f'{data_filepath}/train.npz', allow_pickle=True)
     images_array = data_train["samples"]
     language = data_train["languages"]
 
@@ -114,7 +124,7 @@ def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
     print("Loading test data...")
     test = [0, 0, 0]
     for i in range(len(test)):
-        test_data = np.load(f"{test_data_filepath}/test_d{i}.npz",
+        test_data = np.load(f"{data_filepath}/test_d{i}.npz",
                             allow_pickle=True)
         images_array = test_data["samples"]
         language = test_data["languages"]
@@ -132,11 +142,11 @@ def main(model_type, with_language, with_mask, num_epochs, action_bits_indices,
             X, Z, Y = test[distance]
             score = model.evaluate(x=[X, Z], y=Y,
                                    return_dict="true", verbose=False)
-            #
 
-            if ((i + 1) % 20) == 0:
+            if ((i + 1) % save_every_n_epochs) == 0:
                 model.save(f"{save_model_filepath}/{model_type}.keras")
-                visualise_images_with_action(model, X, Z, Y, logs_filepath, distance)
+                if save_figures:
+                    visualise_images_with_action(model, X, Z, Y, figures_path, distance)
 
             score["epoch"] = i
             score["distance"] = distance

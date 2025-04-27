@@ -873,4 +873,5 @@ def plot_images_with_action(x, a, y, y_prime, filename_id):
     # Adjust layout and save the figure
     plt.tight_layout()
     plt.savefig(f"{filename_id}.png", bbox_inches='tight')
+    plt.savefig(f"{filename_id}.svg", bbox_inches='tight')
     plt.close()

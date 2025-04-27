@@ -16,7 +16,7 @@ rotate_model_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips
 
 output_figures_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\figures\errors'
 
-all_models = ['axial_point_network_full', 'axial_point_network_lines', 'pure_cnn', 'transformer', 'mlp_nn']
+all_models = ['axial_point_network_full', 'axial_point_network_lines', 'cnn', 'transformer', 'mlp_nn']
 
 
 def create_and_save_figs(model, X, Z, Y, logs_filepath, distance):
@@ -60,7 +60,7 @@ def generate_figures_in_action_out_predicted_for_model_and_datatype(model_type, 
     """
     Call the training of the compositional model
     :param output_figures_folder: The base folder where the model folders with the resulting figures are.
-    :param model_type: The model type string. Can be axial_point_network_lines, axial_point_network_full, pure_cnn, transformer, mlp_nn
+    :param model_type: The model type string. Can be axial_point_network_lines, axial_point_network_full, cnn, transformer, mlp_nn
     :param model_filepath: The path where the model will be loaded from as output_filepath/model_type.keras
     :param test_data_filepath: The file path of the test data sets. The full paths are test_data_filepath/test_d{i}.npz since it assumes that the names of the test sets are test_d0.npz, test_d1.npz and test_d2.npz
     :return:

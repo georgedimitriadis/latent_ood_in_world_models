@@ -13,7 +13,7 @@ from models.nn_components import (build_encoder,
 from models.utils import OneHotLayer
 
 
-def pure_cnn(input_shape=(32, 32, 11), base_filters=64, encoder_filters=128, n_tasks=2):
+def cnn(input_shape=(32, 32, 11), base_filters=64, encoder_filters=128, n_tasks=2):
     # Create the saved_models
     input_z_shape = (1,)
     encoder_input = (32, 32, 11)
