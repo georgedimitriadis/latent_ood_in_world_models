@@ -26,6 +26,7 @@ all: $(SO_FILE)
 ## Create all datasets
 create_data:
 	@echo "Making translate train set"
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 1000 data/processed/compositional_translate/train.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":0, "transformation_type": "translate"}'
 	@echo "Making translate test distance 0 set"
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_translate/test_d0.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
 	@echo "Making translate test distance 1 set"
@@ -44,15 +45,15 @@ create_data:
 
 ## Train all models
 train_models:
-	#@echo "Train MLP on translate"
-	#CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn 100 saved_models/translate data/processed/compositional_translate data/results/translate
-	#@echo "Train CNN on translate"
-	#CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn 100 saved_models/translate data/processed/compositional_translate data/results/translate
-	#@echo "Train Transformer on translate"
-	#CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer 100 saved_models/translate data/processed/compositional_translate data/results/translate
-	#@echo "Train Axial Pointer Full on translate"
-	#CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_full 100 saved_models/translate data/processed/compositional_translate data/results/translate
-	#@echo "Train Axial Pointer Linear on translate"
+	@echo "Train MLP on translate"
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn 100 saved_models/translate data/processed/compositional_translate data/results/translate
+	@echo "Train CNN on translate"
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn 100 saved_models/translate data/processed/compositional_translate data/results/translate
+	@echo "Train Transformer on translate"
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer 100 saved_models/translate data/processed/compositional_translate data/results/translate
+	@echo "Train Axial Pointer Full on translate"
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_full 100 saved_models/translate data/processed/compositional_translate data/results/translate
+	@echo "Train Axial Pointer Linear on translate"
 	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_lines 100 saved_models/translate data/processed/compositional_translate data/results/translate
 	@echo "Train MLP on rotate"
 	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn 100 saved_models/rotate data/processed/compositional_rotate data/results/rotate

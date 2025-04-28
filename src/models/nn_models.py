@@ -36,13 +36,13 @@ def cnn(input_shape=(32, 32, 11), base_filters=64, encoder_filters=128, n_tasks=
     sprime_decoder = build_decoder(x.shape[1:], 11,
                                    base_filters, "gelu")(x)
     sprime_decoder = layers.Activation("softmax")(sprime_decoder)
-    model = keras.Model([s_input_x, s_input_z], sprime_decoder, name="lr")
+    model = keras.Model([s_input_x, s_input_z], sprime_decoder, name="cnn")
 
     return model
 
 
 def axial_pointer_network(input_shape=(32, 32, 11), patch_size=8,
-                          with_language: str = False, with_mask: bool = False,
+                          with_language: bool = False, with_mask: bool = False,
                           line_features: bool = False,
                           projection_dim=256, dropout=0.3,
                           n_mlp_layers=10, n_mlp_units=256,
@@ -139,7 +139,8 @@ def axial_pointer_network(input_shape=(32, 32, 11), patch_size=8,
             final = SmoothBlendLayer(name="smooth_blend")([new_image, atten_c, mask])
             output = final
 
-    model = keras.Model([s_input_x, s_input_z], output, name="lr")
+    model = keras.Model([s_input_x, s_input_z], output, name="axial_pointer_linear_network" if line_features else
+                        'axial_pointer_network')
 
     return model
 
@@ -208,7 +209,7 @@ def transformer(input_shape=(32, 32, 11), patch_size=8, with_language: str = Fal
 
     final = x
 
-    model = keras.Model([s_input_x, s_input_z], final, name="lr")
+    model = keras.Model([s_input_x, s_input_z], final, name="transformer")
 
     return model
 
@@ -268,7 +269,7 @@ def mlp_nn(input_shape=(32, 32, 11), patch_size=8, with_language: str = False,
 
     final = x
 
-    model = keras.Model([s_input_x, s_input_z], final, name="lr")
+    model = keras.Model([s_input_x, s_input_z], final, name="mlp")
 
     return model
 
