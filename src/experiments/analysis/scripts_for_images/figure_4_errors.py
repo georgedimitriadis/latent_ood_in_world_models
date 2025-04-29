@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from experiments.analysis.intermediate_layer_analysis_functions import load_data, load_models_layers, un_one_hot
-from visualization.visualize_data import plot_data
+from visualization.basic_visualisation_of_data import plot_data
 
 translate_data_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\data\object_compositionality\symmetric_translate_withoutpi'
 rotate_data_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\data\object_compositionality\nonsymmetric_rotate_withoutpi'

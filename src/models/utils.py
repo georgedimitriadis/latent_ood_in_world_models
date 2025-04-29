@@ -843,7 +843,7 @@ def process_image_batches(all_images: np.ndarray, num_processes: int = 50) -> Tu
 
 
 import matplotlib.pyplot as plt
-from visualization.visualize_data import plot_data
+from visualization.basic_visualisation_of_data import plot_data
 def plot_images_with_action(x, a, y, y_prime, filename_id):
     """
     Plots three images (x, y, y') side-by-side with an action indicator in between.

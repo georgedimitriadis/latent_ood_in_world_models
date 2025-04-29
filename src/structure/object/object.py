@@ -12,7 +12,7 @@ from scipy import ndimage as ndi
 import skimage
 
 from structure.object.transformation import ObjectTransformations
-from visualization import visualize_data as vis
+from visualization import basic_visualisation_of_data as vis
 from structure.geometry.basic_geometry import Point, Vector, Orientation, Surround, Bbox, \
     Dimension2D, RelativePoint, Colour
 

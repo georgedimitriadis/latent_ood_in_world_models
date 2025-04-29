@@ -71,6 +71,17 @@ train_models:
 visualise_models:
 	CUDA_VISIBLE_DEVICES="0" PYTHONPATH=./src KERAS_BACKEND="jax" $(PYTHON_INTERPRETER) src/visualization/visualise_model.py models/experiment/composition/axial_pointer_network.keras ./figures/models data/processed/compositional/test_d2.npz
 
+## Create Images of the saved data sets
+visualise_saved_data:
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/train.npz data/results/translate/figures/train 200
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/train.npz data/results/rotate/figures/train 200
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d0.npz data/results/translate/figures/test_d0 20
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d0.npz data/results/rotate/figures/test_d0 20
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d1.npz data/results/translate/figures/test_d1 20
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d1.npz data/results/rotate/figures/test_d1 20
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d2.npz data/results/translate/figures/test_d2 20
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d2.npz data/results/rotate/figures/test_d2 20
+
 
 ## Delete all compiled Python files
 clean:

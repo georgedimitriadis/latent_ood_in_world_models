@@ -4,7 +4,7 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 
 from experiments.data.generation.data_to_tasks import SavedExperimentalDataToTask
-from visualization.visualize_data import plot_data
+from visualization.basic_visualisation_of_data import plot_data
 import numpy as np
 
 

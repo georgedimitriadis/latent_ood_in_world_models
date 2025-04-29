@@ -510,6 +510,10 @@ class Task:
         :return:
         """
 
+        num_of_figure = None
+        if save_as is not None:
+            num_of_figure = 1
+
         thin_lines = True
         if save_as is None:
             thin_lines = False
@@ -525,7 +529,7 @@ class Task:
             self.test_input_canvas.show(save_as=save_as)
 
         elif canvas_index == 'all':
-            fig = plt.figure(figsize=(6, 16))
+            fig = plt.figure(num=num_of_figure, figsize=(6, 16))
             index = 1
             nrows = self.number_of_io_pairs + 1 if two_cols else self.number_of_io_pairs
             ncoloumns = 2 if two_cols else 3
@@ -559,7 +563,8 @@ class Task:
             plt.tight_layout(pad=0.01)
 
             if save_as is not None:
-                fig.savefig(save_as, dpi=5000)
-                plt.close('all')
+                fig.savefig(save_as, dpi=500)
+                plt.clf()
+                #plt.close('all')
 
 

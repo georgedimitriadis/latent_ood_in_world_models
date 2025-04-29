@@ -21,7 +21,30 @@ for data_type in data_types:
         for d in [0, 1, 2]:
             all_results[data_type][d].append(raw_results['error'][raw_results['distance'] == d].to_numpy())
 
+'''
+del all_results['rotate'][0][1]
+del all_results['rotate'][1][1]
+del all_results['rotate'][2][1]
+'''
 
-fig = plt.plot()
+fig = plt.figure(constrained_layout=True)
+fig.suptitle('Results')
+subfigs = fig.subfigures(nrows=2, ncols=1)
+
+for data_type, subfig in zip(data_types, subfigs):
+    subfig.suptitle(data_type)
+
+    axs = subfig.subplots(nrows=1, ncols=3)
+    for d, ax in zip([0, 1, 2], axs):
+        data = np.transpose(all_results[data_type][d])
+        ax.plot(data)
+        ax.set_title(f'Distance {d}')
+
+fig.text(0.5, 0.04, 'epochs', ha='center', va='center')
+fig.text(0.06, 0.5, '% error', ha='center', va='center', rotation='vertical')
+
+
+
+
 
 

@@ -11,7 +11,7 @@ from experiments.data.generation.utils import do_two_objects_overlap
 from structure.object.object import Object
 from structure.utils import union2d
 from experiments.data.generation import constants as const
-from visualization import visualize_data as vis
+from visualization import basic_visualisation_of_data as vis
 from structure.object.primitives import Primitive, Random, Dot, Predefined
 from structure.geometry.basic_geometry import Point, Dimension2D, Surround, Surround_Percentage, Colour
 
