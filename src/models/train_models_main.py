@@ -40,7 +40,7 @@ def visualise_images_with_action(model, X, Z, Y, logs_filepath, distance, epoch)
 @click.argument('data_filepath', type=click.Path())
 @click.argument('logs_filepath', type=click.Path())
 @click.argument('save_every_n_epochs', default=20, type=click.INT)
-@click.argument('action_bits_indices', default='01', type=click.STRING)
+@click.argument('action_bits_indices', default='2', type=click.STRING)
 @click.argument('with_language', default=False, type=click.BOOL)
 @click.argument('with_mask', default=False, type=click.BOOL)
 def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepath, save_figures,
