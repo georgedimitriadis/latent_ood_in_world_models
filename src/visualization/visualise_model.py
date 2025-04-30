@@ -20,7 +20,7 @@ from matplotlib import pyplot as plt
 from models.lm import b_acc_s
 
 
-def visualise_model(model_filepath: str, output_filepath: str, data_filepath: str):
+def visualise_model(model_filepath: str):
     keras.config.enable_unsafe_deserialization()
 
     logging.info("Loading saved_models")
@@ -32,17 +32,11 @@ def visualise_model(model_filepath: str, output_filepath: str, data_filepath: st
     for i, layer in enumerate(original_model.layers):
         print(f"{i}: {layer.name}")
 
-    selected_layers = [
-        'attention_logits',
-        'mask',
-        'new_image',
-        'smooth_blend'
-    ]
-
+    selected_layers = [layer.name for layer in original_model.layers]
     # Get the output tensors for our selected layers
     output_tensors = [
-        original_model.get_layer(layer_name).output
-        for layer_name in selected_layers
+        original_model.get_layer(layer.name).output
+        for layer in original_model.layers
     ]
 
     # Create new model with multiple outputs
@@ -64,11 +58,9 @@ def visualise_model(model_filepath: str, output_filepath: str, data_filepath: st
 
 @click.command()
 @click.argument('model_filepath', type=click.File())
-@click.argument('output_filepath', type=click.Path())
-@click.argument('data_filepath', type=click.Path())
-def main(model_filepath, output_filepath, data_filepath):
+def main(model_filepath):
     model_filepath = model_filepath.name
-    visualise_model(model_filepath=model_filepath, output_filepath=output_filepath, data_filepath=data_filepath)
+    visualise_model(model_filepath=model_filepath)
 
 
 if __name__ == '__main__':
