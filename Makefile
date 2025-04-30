@@ -114,7 +114,7 @@ visualise_all_models_for_some_samples:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_errors.py translate 0 "[10, 100, 200]" saved_models data/processed data/results/translate/all_models_samples
 
 
-## Create images showing the copying of pixels from the first n samples of both networks on both data sets over all distances
+## Create images showing the copying of pixels from the first N samples of both networks on both data sets over all distances
 visualise_copying:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_5_copy_visualisations.py 50 saved_models data/processed data/results
 
