@@ -20,7 +20,7 @@ from matplotlib import pyplot as plt
 from models.lm import b_acc_s
 
 
-def visualise_model(model_filepath: str):
+def printout_model(model_filepath: str):
     keras.config.enable_unsafe_deserialization()
 
     logging.info("Loading saved_models")
@@ -60,7 +60,7 @@ def visualise_model(model_filepath: str):
 @click.argument('model_filepath', type=click.File())
 def main(model_filepath):
     model_filepath = model_filepath.name
-    visualise_model(model_filepath=model_filepath)
+    printout_model(model_filepath=model_filepath)
 
 
 if __name__ == '__main__':
