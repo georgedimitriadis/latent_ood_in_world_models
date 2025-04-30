@@ -95,7 +95,6 @@ def axial_pointer_network(input_shape=(32, 32, 11), patch_size=8,
     for i in range(n_atten_layers):
 
         x = Patches(patch_size)(start)
-        #print(x.shape)
         x = pe_x(x)
         for g in range(n_mlp_layers):
              x = gMLPLayer(num_patches, projection_dim, dropout,

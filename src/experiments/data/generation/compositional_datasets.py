@@ -65,13 +65,13 @@ def generate_compositional_datasets(num_of_outputs: int = 10, distance: int = 0,
     This task generates examples using only type, colour and action as Concept Variables
     and object size and object position as a free Variables (so only 5 out of the 6 available Variables).
 
-    For transformation_type = translate and symmetric_objects = True:
+    For transformation_type = translate and symmetric_objects = True (the Translate world model in teh paper):
     The training Concept Groups (distance = 0) are 1) Square, Red, Moving Up, (000) 2) Cross, Red, Moving Up, (100)
     3) Square, Blue, Moving up (010) and 4) Square, Red, Moving Left (001).
     The test Concept Groups (distance = 1) are 1) Cross, Blue, Moving Up, (110) 2) Crosse, Red, Moving Left, (101)
     and 3) Square, Blue, Moving Left (011) and distance = 2 are (111) Cross, Blue, Moving Left
 
-    For transformation_type = rotate nd symmetric_objects = False:
+    For transformation_type = rotate nd symmetric_objects = False (the Rotate world model in teh paper):
     The training Concept Groups (distance = 0) are 1) Pyramid, Red, Rotate 90, (000) 2) Angle, Red, Rotate 90, (100)
     3) Pyramid, Blue, Rotate 90 (010) and 4) Pyramid, Red, Rotate 180 (001).
     The test Concept Groups (distance = 1) are 1) Angle, Blue, Rotate 90, (110) 2) Angle, Red, Rotate 180, (101)

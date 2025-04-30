@@ -1,12 +1,20 @@
-.PHONY: createdata
+.DEFAULT_GOAL := help
+.PHONY: create_data train_models visualise_models visualise_saved_data clean lint create_environment help
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BUCKET = [OPTIONAL] your-bucket-for-syncing-data (do not include 's3://')
 PROFILE = default
 PROJECT_NAME = latent_ood_in_world_models
+
 PYTHON_INTERPRETER = python
 CUDA_VISIBLE_DEVICE = "0"
 BACKEND = "jax"
+
+NUM_TRAIN_BATCHES = 1000
+NUM_TEST_BATCHES = 10
+NUM_TRAINING_EPOCHS = 100
+NUM_TRAIN_SET_IMAGES_TO_VISUALISE = 200
+NUM_TEST_SET_IMAGES_TO_VISUALISE = 20
 
 ifeq (,$(shell which conda))
 HAS_CONDA=False
@@ -26,45 +34,45 @@ all: $(SO_FILE)
 ## Create all datasets
 create_data:
 	@echo "Making translate train set"
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 1000 data/processed/compositional_translate/train.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_translate/train.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
 	@echo "Making translate test distance 0 set"
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_translate/test_d0.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d0.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
 	@echo "Making translate test distance 1 set"
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_translate/test_d1.npz generate_compositional_datasets '{"distance":1, "symmetric_objects":1, "transformation_type": "translate"}'
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d1.npz generate_compositional_datasets '{"distance":1, "symmetric_objects":1, "transformation_type": "translate"}'
 	@echo "Making translate test distance 2 set"
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_translate/test_d2.npz generate_compositional_datasets '{"distance":2, "symmetric_objects":1, "transformation_type": "translate"}'
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d2.npz generate_compositional_datasets '{"distance":2, "symmetric_objects":1, "transformation_type": "translate"}'
 	@echo "Making rotate train set"
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 1000 data/processed/compositional_rotate/train.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":0, "transformation_type": "rotate"}'
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_rotate/train.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":0, "transformation_type": "rotate"}'
 	@echo "Making rotate test distance 0 set"
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_rotate/test_d0.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":0, "transformation_type": "rotate"}'
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d0.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":0, "transformation_type": "rotate"}'
 	@echo "Making rotate test distance 1 set"
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_rotate/test_d1.npz generate_compositional_datasets '{"distance":1, "symmetric_objects":0, "transformation_type": "rotate"}'
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d1.npz generate_compositional_datasets '{"distance":1, "symmetric_objects":0, "transformation_type": "rotate"}'
 	@echo "Making rotate test distance 2 set"
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py 10 data/processed/compositional_rotate/test_d2.npz generate_compositional_datasets '{"distance":2, "symmetric_objects":0, "transformation_type": "rotate"}'
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d2.npz generate_compositional_datasets '{"distance":2, "symmetric_objects":0, "transformation_type": "rotate"}'
 
 
 ## Train all models
 train_models:
 	@echo "Train MLP on translate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn 100 saved_models/translate data/processed/compositional_translate data/results/translate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
 	@echo "Train CNN on translate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn 100 saved_models/translate data/processed/compositional_translate data/results/translate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
 	@echo "Train Transformer on translate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer 100 saved_models/translate data/processed/compositional_translate data/results/translate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
 	@echo "Train Axial Pointer Full on translate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_full 100 saved_models/translate data/processed/compositional_translate data/results/translate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_full $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
 	@echo "Train Axial Pointer Linear on translate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_lines 100 saved_models/translate data/processed/compositional_translate data/results/translate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_lines $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
 	@echo "Train MLP on rotate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn 100 saved_models/rotate data/processed/compositional_rotate data/results/rotate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
 	@echo "Train CNN on rotate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn 100 saved_models/rotate data/processed/compositional_rotate data/results/rotate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
 	@echo "Train Transformer on rotate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer 100 saved_models/rotate data/processed/compositional_rotate data/results/rotate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
 	@echo "Train Axial Pointer Full on rotate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_full 100 saved_models/rotate data/processed/compositional_rotate data/results/rotate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_full $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
 	@echo "Train Axial Pointer Linear on rotate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_lines 100 saved_models/rotate data/processed/compositional_rotate data/results/rotate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_lines $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
 
 
 ## Create Visualisations
@@ -73,15 +81,17 @@ visualise_models:
 
 ## Create Images of the saved data sets
 visualise_saved_data:
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/train.npz data/results/translate/figures/train 200
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/train.npz data/results/rotate/figures/train 200
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d0.npz data/results/translate/figures/test_d0 20
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d0.npz data/results/rotate/figures/test_d0 20
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d1.npz data/results/translate/figures/test_d1 20
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d1.npz data/results/rotate/figures/test_d1 20
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d2.npz data/results/translate/figures/test_d2 20
-	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d2.npz data/results/rotate/figures/test_d2 20
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/train.npz data/results/translate/figures/train $(NUM_TRAIN_SET_IMAGES_TO_VISUALISE)
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/train.npz data/results/rotate/figures/train $(NUM_TRAIN_SET_IMAGES_TO_VISUALISE)
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d0.npz data/results/translate/figures/test_d0 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d0.npz data/results/rotate/figures/test_d0 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d1.npz data/results/translate/figures/test_d1 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d1.npz data/results/rotate/figures/test_d1 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d2.npz data/results/translate/figures/test_d2 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d2.npz data/results/rotate/figures/test_d2 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
 
+visualise_result_curves:
+	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py data/results  data/results
 
 ## Delete all compiled Python files
 clean:
@@ -95,7 +105,7 @@ lint:
 ## Set up python interpreter environment
 create_environment:
 ifeq (True,$(HAS_CONDA))
-		@echo ">>> Detected conda, creating conda environment."
+	@echo ">>> Detected conda, creating conda environment."
 ifeq (3,$(findstring 3,$(PYTHON_INTERPRETER)))
 	conda create --name $(PROJECT_NAME) python=3
 else
@@ -123,25 +133,6 @@ test_environment:
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################
-
-.DEFAULT_GOAL := help
-
-# Inspired by <http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html>
-# sed script explained:
-# /^##/:
-# 	* save line in hold space
-# 	* purge line
-# 	* Loop:
-# 		* append newline + line to hold space
-# 		* go to next line
-# 		* if line starts with doc comment, strip comment character off and loop
-# 	* remove target prerequisites
-# 	* append hold space (+ newline) to line
-# 	* replace newline plus comments by `---`
-# 	* print line
-# Separate expressions are necessary because labels cannot be delimited by
-# semicolon; see <http://stackoverflow.com/a/11799865/1968>
-.PHONY: help
 help:
 	@echo "$$(tput bold)Available rules:$$(tput sgr0)"
 	@echo

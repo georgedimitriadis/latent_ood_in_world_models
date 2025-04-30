@@ -53,13 +53,14 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
     :param save_model_filepath: The path where the model will be saved as output_filepath/model_type.keras
     :param data_filepath: The file path of the train and test data sets.
     :param logs_filepath: The path where the log file will be saved as logs_filepath/composition_log_model_type.csv
-    :param save_figures: If True then save the figure showing the input, action, true output and network output
+    :param save_figures: If True then save the figures from all samples showing the input, action, true output and the
+                         network output every n epochs.
     :param save_every_n_epochs: Save the network (and the figures if save_figures is True) every n epochs
     :param action_bits_indices: The indices of the language['bits'] array values (bits) that should be used to define
                                 the action.
-    :param with_language: If True then use the language mechanism in the NN to generate the task index. If False no
+    :param with_language: If True then uses the language mechanism in the NN to generate the task index. If False no
                           such mechanism is used.
-    :param with_mask: If True then the axial point networks will create a final mask to copy stuff from a new image.
+    :param with_mask: If True then the axial pointer networks will create a final mask to copy stuff from a new image.
     :return:
     """
 

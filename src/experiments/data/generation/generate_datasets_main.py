@@ -62,12 +62,12 @@ def generate_20x32x32_samples_dataset(seed, gen_function: Callable, gen_function
 @click.argument('generating_functions_args', type=click.UNPROCESSED)
 def main(generating_function, generating_functions_args, output_filepath, num_samples):
     """
-    The function to call from the command line in order to save data produced by a certain Task generating function.
+    The function to call in order to save data produced by a certain Task generating function.
     :param generating_function: The name of the Task generating function to be used. The function needs to have been
                                 imported for this to work. For the paper the only function is generate_compositional_datasets
     :param generating_functions_args: The string of the dictionary (in json format) of the arguments of the Task
                                       generating function without the num_of_examples argument. E.g. for the
-                                      generate_compositional_datasets gen function a possible
+                                      generate_compositional_datasets gen function possible
                                       generating_functions_args would be '{"distance": 0, "symmetric_objects": 1,
                                       "transformation_type": "translate", "second_object": 0}'.
     :param output_filepath: The full path where the generated data (arrays) will be stored. The resulting file is an .npz.
