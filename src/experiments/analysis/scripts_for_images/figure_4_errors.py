@@ -18,10 +18,9 @@ translate_model_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neur
 rotate_model_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\models\object_compositionality\nonsymmetric_rotate_withoutpi'
 
 output_figures_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\figures\errors'
-
-
 '''
-all_models = ['axial_point_network_full', 'axial_point_network_lines', 'cnn', 'transformer', 'mlp_nn']
+
+all_models = ['axial_pointer_network_full', 'axial_pointer_network_lines', 'cnn', 'transformer', 'mlp_nn']
 
 
 def generate_figure_all_models_error_example(model_filepath: str, test_data_filepath: str, save_figure_filepath: str,
@@ -37,7 +36,7 @@ def generate_figure_all_models_error_example(model_filepath: str, test_data_file
     }
 
     for i, model_name in enumerate(all_models):
-        current_model_filepath = join(model_filepath, f'{model_name}.keras')
+        current_model_filepath = join(model_filepath, data_type, f'{model_name}.keras')
         model = keras.models.load_model(f"{current_model_filepath}")
 
         test_data_filepath_dist = join(test_data_filepath, f'test_d{dist}.npz')

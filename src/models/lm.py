@@ -22,7 +22,6 @@ def logcosh(y_true, y_pred):
 
 
 def r2(y_true, y_pred):
-
     #Residual sum of squares for each output
     ss_res = keras.ops.sum(keras.ops.square(y_true - y_pred), axis=0)
 
@@ -43,22 +42,15 @@ def acc_seq(y_true, y_pred):
 def b_acc2(y_true, y_pred):
     # Convert softmax probabilities to class predictions
 
-    #print(y_pred.shape, y_true.shape)
     y_pred_classes = keras.ops.argmax(y_pred, axis=-1)
     y_true_classes = keras.ops.argmax(y_true, axis=-1)
-    #print(y_pred_classes.shape, y_true_classes.shape)
 
     # Compare predictions with true values
-
     correct_pixels = keras.ops.equal(y_pred_classes, y_true_classes)
-
-    #print(correct_pixels.shape)
 
     # Check if all pixels in an image are correct
     correct_images = keras.ops.all(correct_pixels, axis=[1, 2])
-    #print(correct_images)
     correct_images = keras.ops.sum(keras.ops.cast(correct_images, "float32"))
-    #print(correct_images.shape, "shape images")
 
     # Calculate the proportion of correct images in the batch
     #accuracy = keras.ops.mean(keras.ops.cast(correct_images, "float32"))

@@ -18,7 +18,6 @@ from models.utils import write_dict_to_csv
 from models.lm import b_acc_s
 
 
-
 def visualise_model(model: keras.Model, to_file: str = "./model.png"):
     keras.utils.plot_model(model, to_file=to_file, show_shapes=True, show_dtype=False, show_layer_names=True,
                            rankdir="TB", expand_nested=False, dpi=200, show_layer_activations=False,
@@ -48,7 +47,7 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
          save_every_n_epochs, action_bits_indices, with_language, with_mask):
     """
     Call the training of the compositional models
-    :param model_type: The model type string. Can be axial_point_network_lines, axial_point_network_full, cnn,
+    :param model_type: The model type string. Can be axial_pointer_network_lines, axial_pointer_network_full, cnn,
                        transformer, mlp_nn
     :param num_epochs: Number of epochs
     :param save_model_filepath: The path where the model will be saved as output_filepath/model_type.keras
@@ -70,7 +69,7 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
     else:
         action_bits_indices = [-1]
 
-    if 'axial_point_network' in model_type:
+    if 'axial_pointer_network' in model_type:
         if 'full' in model_type:
             line_features = False
             n_mlp_units = 32
@@ -100,7 +99,6 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
         bits = [[l['bits'][i] for i in action_bits_indices] for l in language]
         merged = [[int(''.join(map(str, bit)), 2)] for bit in bits]
 
-        #merged = [l["bits"][-1:] for l in language]
         input_array = np.array(merged, dtype="int8")
         return input_array
 

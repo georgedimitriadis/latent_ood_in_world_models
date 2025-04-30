@@ -60,9 +60,9 @@ train_models:
 	@echo "Train Transformer on translate"
 	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
 	@echo "Train Axial Pointer Full on translate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_full $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_full $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
 	@echo "Train Axial Pointer Linear on translate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_lines $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_lines $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate
 	@echo "Train MLP on rotate"
 	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
 	@echo "Train CNN on rotate"
@@ -70,9 +70,9 @@ train_models:
 	@echo "Train Transformer on rotate"
 	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
 	@echo "Train Axial Pointer Full on rotate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_full $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_full $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
 	@echo "Train Axial Pointer Linear on rotate"
-	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_point_network_lines $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_lines $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate
 
 
 ## Create Visualisations

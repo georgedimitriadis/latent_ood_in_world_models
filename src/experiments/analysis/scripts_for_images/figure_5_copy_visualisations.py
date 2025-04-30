@@ -19,7 +19,7 @@ vis_figures_output_path = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neu
 translate_path = 'symmetric_translate_withoutpi'
 rotate_path = 'nonsymmetric_rotate_withoutpi'
 
-models = ['axial_point_network_lines', 'axial_point_network_full']
+models = ['axial_pointer_network_lines', 'axial_pointer_network_full']
 final_layers = ['attention_mapping_layer2d', 'spatial_copy_layer']
 
 distance = 0
