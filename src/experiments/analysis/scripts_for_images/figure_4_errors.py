@@ -11,18 +11,6 @@ import ast
 from experiments.analysis.intermediate_layer_analysis_functions import load_data
 from visualization.basic_visualisation_of_data import plot_data
 from models.lm import b_acc_s
-from models.utils import OneHotLayer
-from models.nn_components import Patches
-
-'''
-translate_data_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\data\object_compositionality\symmetric_translate_withoutpi'
-rotate_data_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\data\object_compositionality\nonsymmetric_rotate_withoutpi'
-
-translate_model_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\models\object_compositionality\symmetric_translate_withoutpi'
-rotate_model_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\models\object_compositionality\nonsymmetric_rotate_withoutpi'
-
-output_figures_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\figures\errors'
-'''
 
 all_models = ['axial_pointer_network_full', 'axial_pointer_network_lines', 'cnn', 'transformer', 'mlp_nn']
 
