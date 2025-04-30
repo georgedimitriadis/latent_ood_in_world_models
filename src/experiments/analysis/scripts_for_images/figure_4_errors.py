@@ -1,14 +1,18 @@
-
+import os.path
 from os.path import join
+from pathlib import Path
 
 import click
 import keras
 import numpy as np
 import matplotlib.pyplot as plt
+import ast
 
 from experiments.analysis.intermediate_layer_analysis_functions import load_data
 from visualization.basic_visualisation_of_data import plot_data
 from models.lm import b_acc_s
+from models.utils import OneHotLayer
+from models.nn_components import Patches
 
 '''
 translate_data_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\data\object_compositionality\symmetric_translate_withoutpi'
@@ -36,7 +40,7 @@ def generate_figure_all_models_error_example(model_filepath: str, test_data_file
     }
 
     for i, model_name in enumerate(all_models):
-        current_model_filepath = join(model_filepath, data_type, f'{model_name}.keras')
+        current_model_filepath = join(model_filepath, f'{model_name}.keras')
         model = keras.models.load_model(f"{current_model_filepath}")
 
         test_data_filepath_dist = join(test_data_filepath, f'test_d{dist}.npz')
@@ -76,16 +80,31 @@ def generate_figure_all_models_error_example(model_filepath: str, test_data_file
     save_figure_filename = join(save_figure_filepath, f'errors_{data_type}_distance_{dist}_sample_{index}')
     fig.savefig(f'{save_figure_filename}.png')
     fig.savefig(f'{save_figure_filename}.svg')
+    plt.close('all')
 
 
 @click.command()
 @click.argument('data_type', type=click.STRING)
 @click.argument('dist', type=click.INT)
-@click.argument('index', type=click.INT)
+@click.argument('indices', type=click.STRING)
 @click.argument('model_folder', type=click.Path())
 @click.argument('data_folder', type=click.Path())
 @click.argument('save_figure_folder', type=click.Path())
-def main(model_folder: str, data_folder: str, save_figure_folder: str, data_type: str, dist: int, index: int):
+def main(model_folder: str, data_folder: str, save_figure_folder: str, data_type, dist, indices):
+    """
+    The main function to call in order to generate a number of images showing the results of all the networks for a
+    specific sample.
+
+    :param model_folder: The top folder of the models (above the translate, rotate folders)
+    :param data_folder: The top folder for the data (above the compositional_translate, compositional_rotate ones)
+    :param save_figure_folder: The folder to save the generated figures in
+    :param data_type: translate Or rotate
+    :param dist: 0, 1 or 2
+    :param indices: Either a list of indices (e.g. [1, 10, 235]) or a number that will pick that many random samples
+    :return:
+    """
+    if not os.path.exists(save_figure_folder):
+        Path(save_figure_folder).mkdir(parents=True, exist_ok=True)
 
     translate_data_folder = join(data_folder, 'compositional_translate')
     rotate_data_folder = join(data_folder, 'compositional_rotate')
@@ -94,6 +113,14 @@ def main(model_folder: str, data_folder: str, save_figure_folder: str, data_type
 
     test_data_filepath = translate_data_folder if data_type == 'translate' else rotate_data_folder
     model_filepath = translate_model_folder if data_type == 'translate' else rotate_model_folder
+
+    indices = ast.literal_eval(indices)
+    if type(indices) == int:
+        indices = np.random.choice(np.arange(1000), indices)
+
+    for index in indices:
+        generate_figure_all_models_error_example(model_filepath, test_data_filepath, save_figure_folder,
+                                                 data_type, dist, index)
 
 
 if __name__ == '__main__':

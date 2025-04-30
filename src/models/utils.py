@@ -271,7 +271,7 @@ class CustomModelCheckpoint(keras.callbacks.Callback):
                 model.save(f"{self.path}/{name}.keras", overwrite=True)
 
 
-@keras.saving.register_keras_serializable(package="saved_models")
+@keras.saving.register_keras_serializable(package="models")
 class BinaryDense(keras.layers.Layer):
     def __init__(self, units, kernel_initializer='glorot_uniform', bias_initializer='zeros', **kwargs):
         super(BinaryDense, self).__init__(**kwargs)
@@ -434,7 +434,7 @@ def get_weights(self):
 
     return W
 
-@keras.saving.register_keras_serializable(package="saved_models")
+@keras.saving.register_keras_serializable(package="models")
 class OneHotLayer(keras.layers.Layer):
     def __init__(self, num_classes=11, axis=-1, name="oh", **kwargs):
         super(OneHotLayer, self).__init__(name=name, **kwargs)
@@ -461,7 +461,7 @@ class OneHotLayer(keras.layers.Layer):
         return config
 
 
-@keras.saving.register_keras_serializable(package="saved_models")
+@keras.saving.register_keras_serializable(package="models")
 class EvenOddLayer(keras.layers.Layer):
     def __init__(self, max_elements=10, even=True, name="evenodd", **kwargs):
         super(EvenOddLayer, self).__init__(name=name, **kwargs)

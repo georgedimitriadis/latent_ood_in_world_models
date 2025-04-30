@@ -93,6 +93,9 @@ visualise_saved_data:
 visualise_result_curves:
 	CUDA_VISIBLE_DEVICES="" PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py data/results  data/results
 
+visualise_all_models_for_some_samples:
+	CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) KERAS_BACKEND=$(BACKEND) PYTHONPATH=./src $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_errors.py translate 0 "[10, 100, 200]" saved_models data/processed data/results/translate/all_models_samples
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete

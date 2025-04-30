@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import click
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -36,6 +39,9 @@ def main(results_path: str, save_figure_path: str):
                 ax.legend(model_names)
     fig.text(0.5, 0.01, 'epochs', ha='center', va='center')
     fig.text(0.01, 0.5, '% error', ha='center', va='center', rotation='vertical')
+
+    if not os.path.exists(save_figure_path):
+        Path(save_figure_path).mkdir(parents=True, exist_ok=True)
 
     save_figure_filename = join(save_figure_path, 'learning_error_graph')
     fig.savefig(f'{save_figure_filename}.png')
