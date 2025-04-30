@@ -15,12 +15,13 @@ def nrmse(y_true, y_pred):
     nrmse = rmse / (range_y_true + 0.00001)  # K.epsilon() avoids division by zero
     return nrmse
 
+
 def logcosh(y_true, y_pred):
     logcosh = keras.ops.mean(keras.ops.log(keras.ops.cosh(y_pred - y_true)), axis=0)
     return logcosh
 
-def r2(y_true, y_pred):
 
+def r2(y_true, y_pred):
 
     #Residual sum of squares for each output
     ss_res = keras.ops.sum(keras.ops.square(y_true - y_pred), axis=0)
@@ -33,11 +34,10 @@ def r2(y_true, y_pred):
 
     return -r2
 
+
 def acc_seq(y_true, y_pred):
     return keras.ops.mean(keras.ops.min(keras.ops.equal(keras.ops.argmax(y_true, axis=-1),
                   keras.ops.argmax(y_pred, axis=-1)), axis=-1))
-
-
 
 
 def b_acc2(y_true, y_pred):
@@ -66,8 +66,6 @@ def b_acc2(y_true, y_pred):
     return correct_images
 
 
-
-
 def b_acc(y_true, y_pred):
     # Get the predicted class by taking the argmax along the last dimension (the class dimension)
     pred_classes = keras.ops.argmax(y_pred, axis=-1)
@@ -92,7 +90,8 @@ def b_acc(y_true, y_pred):
 
     return accuracy
 
-@keras.saving.register_keras_serializable(package="saved_models.lm")
+
+@keras.saving.register_keras_serializable(package="models.lm")
 def b_acc_s(y_true, y_pred):
     # Get the predicted class by taking the argmax along the last dimension (the class dimension)
     pred_classes = keras.ops.argmax(y_pred, axis=-1)

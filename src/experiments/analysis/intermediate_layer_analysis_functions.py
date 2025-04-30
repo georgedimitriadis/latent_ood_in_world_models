@@ -8,6 +8,7 @@ import keras.api.ops as ops
 from models.utils import make_data_from_train_sparse
 import numpy as np
 import keras
+from models.lm import b_acc_s
 
 
 def load_data(data_filepath: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:

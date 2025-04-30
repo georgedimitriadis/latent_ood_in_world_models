@@ -13,9 +13,10 @@ from tqdm import tqdm
 from tqdm.keras import TqdmCallback
 
 from models.nn_models import (axial_pointer_network, cnn, transformer, mlp_nn)
-from models.lm import b_acc_s
 from models.utils import make_data_from_train_sparse, plot_images_with_action
 from models.utils import write_dict_to_csv
+from models.lm import b_acc_s
+
 
 
 def visualise_model(model: keras.Model, to_file: str = "./model.png"):

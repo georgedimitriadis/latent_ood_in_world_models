@@ -13,13 +13,11 @@ import click
 
 import logging
 
-import numpy as np
 from dotenv import find_dotenv, load_dotenv
 from pathlib import Path
-from tqdm import tqdm
 import keras
 from matplotlib import pyplot as plt
-from saved_models.lm import b_acc_s
+from models.lm import b_acc_s
 
 
 def visualise_model(model_filepath: str, output_filepath: str, data_filepath: str):

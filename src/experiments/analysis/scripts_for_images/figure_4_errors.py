@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from experiments.analysis.intermediate_layer_analysis_functions import load_data
 from visualization.basic_visualisation_of_data import plot_data
+from models.lm import b_acc_s
 
 '''
 translate_data_folder = r'E:\Projects Large\Learning\Papers_Proposals\2025_Neurips_OOD_Compositionality_Learning\data\object_compositionality\symmetric_translate_withoutpi'

@@ -3,8 +3,9 @@ import numpy as np
 import keras
 import sklearn.metrics
 from typing import Tuple
-activation = "relu"
 from sklearn.linear_model import Ridge
+from models.lm import b_acc_s
+activation = "relu"
 
 
 def unpack_data(result_from_create_data_from_task: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
