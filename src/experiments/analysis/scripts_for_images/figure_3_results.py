@@ -12,8 +12,8 @@ from os.path import join
 @click.argument('save_figure_path', type=click.Path())
 def main(results_path: str, save_figure_path: str):
     data_types = ['translate', 'rotate']
-    model_types = ['axial_pointer_network_full', 'axial_pointer_network_lines', 'cnn', 'mlp_nn', 'transformer']
-    model_names = ['Axial Pointer', 'Axial Pointer Linear', 'CNN', 'MLP', 'Transformer']
+    model_types = ['axial_pointer_network_lines', 'axial_pointer_network_full', 'cnn', 'mlp_nn', 'transformer']
+    model_names = ['Axial Pointer Linear', 'Axial Pointer', 'CNN', 'MLP', 'Transformer']
 
     all_results = {}
     for data_type in data_types:
