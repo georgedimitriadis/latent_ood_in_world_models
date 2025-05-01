@@ -4,7 +4,6 @@ import os.path
 from os.path import join
 from pathlib import Path
 
-
 import click
 import keras
 import numpy as np

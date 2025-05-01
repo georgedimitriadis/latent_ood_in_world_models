@@ -1,14 +1,11 @@
 .DEFAULT_GOAL := help
-.PHONY: create_data train_models visualise_models visualise_saved_data clean lint create_environment help
+.PHONY: create_data train_models printout_models_layers visualise_saved_data visualise_result_curves visualise_all_models_for_some_samples visualise_copying clean lint create_environment help
 
 
 PROFILE = default
 PROJECT_NAME = latent_ood_in_world_models
 
-PYTHON_INTERPRETER = python
-CUDA_VISIBLE_DEVICE = "0"
-BACKEND = "jax"
-
+# Each batch has 100 samples
 NUM_TRAIN_BATCHES = 1000
 NUM_TEST_BATCHES = 10
 NUM_TRAINING_EPOCHS = 100
@@ -17,10 +14,20 @@ NUM_TEST_SET_IMAGES_TO_VISUALISE = 20
 
 ifeq ($(OS),Windows_NT)
     detected_OS := Windows
-    SET_CMD = set
-    AND_CMD = &
+
+    export PYTHON_INTERPRETER = python
+	export CUDA_VISIBLE_DEVICE = "0"
+	export BACKEND = jax
+
+    export SET_CMD = set
+    export AND_CMD = &
 else
     detected_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown')
+
+    PYTHON_INTERPRETER = python
+	CUDA_VISIBLE_DEVICE = "0"
+	BACKEND =jax
+
     SET_CMD =
     AND_CMD =
 
@@ -106,8 +113,8 @@ visualise_saved_data:
 
 ## Create the Figure 3 image of the error curves
 visualise_result_curves:
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py data/results  data/results
-
+	#$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py data/results  data/results
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py "E:\Projects Large\Learning\TempData\ood_paper\logs_1"  data/results
 
 ## Create images, each one showing the result of all networks for a specific sample. Used to put together figure 4. Change the data type, the distance and the list of samples accordingly
 visualise_all_models_for_some_samples:
@@ -196,3 +203,4 @@ help:
 		printf "\n"; \
 	}' \
 	| more $(shell test $(shell uname) = Darwin && echo '--no-init --raw-control-chars')
+
