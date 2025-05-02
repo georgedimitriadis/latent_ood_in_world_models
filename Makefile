@@ -113,8 +113,7 @@ visualise_saved_data:
 
 ## Create the Figure 3 image of the error curves
 visualise_result_curves:
-	#$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py data/results  data/results
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py "E:\Projects Large\Learning\TempData\ood_paper\logs_1"  data/results
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py data/results  data/results
 
 ## Create images, each one showing the result of all networks for a specific sample. Used to put together figure 4. Change the data type, the distance and the list of samples accordingly
 visualise_all_models_for_some_samples:
