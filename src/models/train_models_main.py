@@ -94,7 +94,7 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
     if os.path.exists(log_filename):
         Path(log_filename).mkdir(parents=True, exist_ok=True)
 
-    figures_path = join(logs_filepath, 'figures', model_type)
+    figures_path = join(logs_filepath, 'logs', f'run_{iteration}', 'figures', model_type)
     if save_figures and not os.path.exists(figures_path):
         Path(figures_path).mkdir(parents=True, exist_ok=True)
 
