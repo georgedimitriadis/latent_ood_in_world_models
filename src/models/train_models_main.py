@@ -38,11 +38,12 @@ def visualise_images_with_action(model, X, Z, Y, logs_filepath, distance, epoch)
 @click.argument('save_model_filepath', type=click.Path())
 @click.argument('data_filepath', type=click.Path())
 @click.argument('logs_filepath', type=click.Path())
+@click.argument('iteration', type=click.INT)
 @click.argument('save_every_n_epochs', default=20, type=click.INT)
 @click.argument('action_bits_indices', default='2', type=click.STRING)
 @click.argument('with_language', default=False, type=click.BOOL)
 @click.argument('with_mask', default=False, type=click.BOOL)
-def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepath, save_figures,
+def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepath, iteration, save_figures,
          save_every_n_epochs, action_bits_indices, with_language, with_mask):
     """
     Call the training of the compositional models
@@ -52,6 +53,7 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
     :param save_model_filepath: The path where the model will be saved as output_filepath/model_type.keras
     :param data_filepath: The file path of the train and test data sets.
     :param logs_filepath: The path where the log file will be saved as logs_filepath/composition_log_model_type.csv
+    :param iteration: train_models needs to run many times to generate a distribution of results. This is the run iteration.
     :param save_figures: If True then save the figures from all samples showing the input, action, true output and the
                          network output every n epochs.
     :param save_every_n_epochs: Save the network (and the figures if save_figures is True) every n epochs
@@ -88,7 +90,9 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
 
     model.summary()
     world_model = 'translate' if 'translate' in data_filepath else 'rotate'
-    log_filename = f"{logs_filepath}/log_{world_model}_{model_type}.csv"
+    log_filename = join(logs_filepath, 'logs', f'run_{iteration}', f'log_{world_model}_{model_type}.csv')
+    if os.path.exists(log_filename):
+        Path(log_filename).mkdir(parents=True, exist_ok=True)
 
     figures_path = join(logs_filepath, 'figures', model_type)
     if save_figures and not os.path.exists(figures_path):
