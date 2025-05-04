@@ -91,7 +91,7 @@ def main(model_type, num_epochs, save_model_filepath, data_filepath, logs_filepa
     model.summary()
     world_model = 'translate' if 'translate' in data_filepath else 'rotate'
     log_filename = join(logs_filepath, 'logs', f'run_{iteration}', f'log_{world_model}_{model_type}.csv')
-    if os.path.exists(log_filename):
+    if not os.path.exists(log_filename):
         Path(log_filename).mkdir(parents=True, exist_ok=True)
 
     figures_path = join(logs_filepath, 'logs', f'run_{iteration}', 'figures', model_type)
