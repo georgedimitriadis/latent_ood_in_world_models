@@ -55,21 +55,21 @@ all: $(SO_FILE)
 ## Create all datasets
 create_data:
 	@echo "Making translate train set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_translate/train.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_translate/train.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
 	@echo "Making translate test distance 0 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d0.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":1, "transformation_type": "translate"}'
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d0.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
 	@echo "Making translate test distance 1 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d1.npz generate_compositional_datasets '{"distance":1, "symmetric_objects":1, "transformation_type": "translate"}'
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d1.npz generate_compositional_datasets "{\"distance\":1, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
 	@echo "Making translate test distance 2 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d2.npz generate_compositional_datasets '{"distance":2, "symmetric_objects":1, "transformation_type": "translate"}'
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d2.npz generate_compositional_datasets "{\"distance\":2, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
 	@echo "Making rotate train set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_rotate/train.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":0, "transformation_type": "rotate"}'
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_rotate/train.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
 	@echo "Making rotate test distance 0 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d0.npz generate_compositional_datasets '{"distance":0, "symmetric_objects":0, "transformation_type": "rotate"}'
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d0.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
 	@echo "Making rotate test distance 1 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d1.npz generate_compositional_datasets '{"distance":1, "symmetric_objects":0, "transformation_type": "rotate"}'
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d1.npz generate_compositional_datasets "{\"distance\":1, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
 	@echo "Making rotate test distance 2 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d2.npz generate_compositional_datasets '{"distance":2, "symmetric_objects":0, "transformation_type": "rotate"}'
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d2.npz generate_compositional_datasets "{\"distance\":2, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
 
 
 ## Train all models
@@ -117,7 +117,7 @@ visualise_result_curves:
 
 ## Create images, each one showing the result of all networks for a specific sample. Used to put together figure 4. Change the data type, the distance and the list of samples accordingly
 visualise_all_models_for_some_samples:
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_errors.py translate 0 "[10, 100, 200]" saved_models data/processed data/results/translate/all_models_samples
+	$(SET_CMD) CUDA_VISIBLE_DEVICES = $(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND = $(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_errors.py translate 0 "[10, 100, 200]" saved_models data/processed data/results/translate/all_models_samples
 
 
 ## Create images showing the copying of pixels from the first N samples of both networks on both data sets over all distances
