@@ -51,3 +51,19 @@ def get_bounding_box(object_pixels: NDArray[int]) -> NDArray[int]:
     return np.array([bottom_left, top_right])
 
 image_index = 0
+if data_type == 'translate':
+    pixels_before_move = np.array([(a[1], a[2]) for a in np.argwhere(X==object_colour) if a[0]==image_index])
+    bounding_box_before_move = get_bounding_box(pixels_before_move)
+    pixels_after_move = np.array([(a[1], a[2]) for a in np.argwhere(Y == object_colour) if a[0] == image_index])
+    bounding_box_after_move = get_bounding_box(pixels_after_move)
+    z = Z[image_index]
+    translation = [0, 6] if z == 0 else [6, 0]
+
+    optimal_pixel_copy_to = np.asarray(copied_from_pixel_indices_all_images)
+
+    object_copying = []
+    for to_pixel in pixels_after_move:
+        from_pixel = np.array([copied_from_pixel_indices_all_images[image_index, to_pixel[0], to_pixel[1], 0],
+                               copied_from_pixel_indices_all_images[image_index, to_pixel[0], to_pixel[1], 1]])
+        object_copying.append(np.array([from_pixel, np.array(to_pixel)]))
+    object_copying = np.array(object_copying)
