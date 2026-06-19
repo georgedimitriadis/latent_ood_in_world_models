@@ -32,7 +32,7 @@ def visualise_attention_results_with_colours(position_colours_in_all_images: np.
     """
     A visualisation of the results of the pixel_to_pixel_from_hw_attention_logits_matrix_based function.
     :param position_colours_in_all_images: The array where each element has a value that is a colour corresponding to the position of the element on the input image.
-    :param position_colours_out_all_images: The array where each element has a value that is the colour of the pixel in the input image that got copied in the position of the output image with the same coordinates as the emelemnt of this array.
+    :param position_colours_out_all_images: The array where each element has a value that is the colour of the pixel in the input image that got copied in the position of the output image with the same coordinates as the element of this array.
     :param im_index: Given that the position_colours_in_all_images and position_colours_out_all_images are batches of images, which input - output pair to visualise.
     :return: The generated figure and the two axis.
     """
