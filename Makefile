@@ -16,11 +16,11 @@ ifeq ($(OS),Windows_NT)
     detected_OS := Windows
 
     export PYTHON_INTERPRETER = python
-	export CUDA_VISIBLE_DEVICE = "0"
+	export CUDA_VISIBLE_DEVICE = 0
 	export BACKEND = jax
 
     export SET_CMD = set
-    export AND_CMD = &
+    export AND_CMD = &&
 else
     detected_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown')
 
@@ -55,35 +55,35 @@ all: $(SO_FILE)
 ## Create all datasets
 create_data:
 	@echo "Making translate train set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_translate/train.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_translate/train.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
 	@echo "Making translate test distance 0 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d0.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d0.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
 	@echo "Making translate test distance 1 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d1.npz generate_compositional_datasets "{\"distance\":1, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d1.npz generate_compositional_datasets "{\"distance\":1, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
 	@echo "Making translate test distance 2 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d2.npz generate_compositional_datasets "{\"distance\":2, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_translate/test_d2.npz generate_compositional_datasets "{\"distance\":2, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
 	@echo "Making rotate train set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_rotate/train.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_rotate/train.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
 	@echo "Making rotate test distance 0 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d0.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d0.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
 	@echo "Making rotate test distance 1 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d1.npz generate_compositional_datasets "{\"distance\":1, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d1.npz generate_compositional_datasets "{\"distance\":1, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
 	@echo "Making rotate test distance 2 set"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d2.npz generate_compositional_datasets "{\"distance\":2, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d2.npz generate_compositional_datasets "{\"distance\":2, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
 
 ## Create OCL compatible datasets
 transform_data_to_ocl_compatible:
 	@echo "Transforming train set to OCL train-val"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_translate/train.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_translate/train.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
 
 
 ## OCL Related
 ## PPretrain SLATE
 pretrain_slate:
 	@echo "Pretrain SLATE on translate train data"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/train_slate.py --data_path data/processed/compositional_translate/train_clo.h5 --save_path saved_models/translate/slate_encoder_translate.pt.tar --image_size 32 --num_slots 3
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/pretrain_slate.py --data_path data/processed/compositional_translate/train_clo.h5 --save_path saved_models/translate/slate_encoder_translate.pt.tar --image_size 32 --num_slots 3 --num_workers 7 --log_every 1 --amp
 	@echo "Pretrain SLATE on rotate train data"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/train_slate.py --data_path data/processed/compositional_rotate/train_clo.h5 --save_path saved_models/rotate/slate_encoder_translate.pt.tar --image_size 32 --num_slots 3
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/pretrain_slate.py --data_path data/processed/compositional_rotate/train_clo.h5 --save_path saved_models/rotate/slate_encoder_rotate.pt.tar --image_size 32 --num_slots 3 --num_workers 7 --log_every 1 --amp
 
 ## Train OCL Model
 
@@ -91,54 +91,54 @@ pretrain_slate:
 ## Train all models
 train_models:
 	@echo "Train MLP on translate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
 	@echo "Train CNN on translate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
 	@echo "Train Transformer on translate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
 	@echo "Train Axial Pointer Full on translate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_full $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_full $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
 	@echo "Train Axial Pointer Linear on translate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_lines $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_lines $(NUM_TRAINING_EPOCHS) saved_models/translate data/processed/compositional_translate data/results/translate 0
 	@echo "Train MLP on rotate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures mlp_nn $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
 	@echo "Train CNN on rotate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures cnn $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
 	@echo "Train Transformer on rotate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures transformer $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
 	@echo "Train Axial Pointer Full on rotate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_full $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_full $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
 	@echo "Train Axial Pointer Linear on rotate"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_lines $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/train_models_main.py --save_figures axial_pointer_network_lines $(NUM_TRAINING_EPOCHS) saved_models/rotate data/processed/compositional_rotate data/results/rotate 0
 
 
 ## Create Printouts of a models layers and their shapes
 printout_models_layers:
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/printout_model.py saved_models/translate/axial_pointer_network_full.keras
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/printout_model.py saved_models/translate/axial_pointer_network_full.keras
 
 ## Create Images of the saved data sets
 visualise_saved_data:
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/train.npz data/results/translate/figures/train $(NUM_TRAIN_SET_IMAGES_TO_VISUALISE)
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/train.npz data/results/rotate/figures/train $(NUM_TRAIN_SET_IMAGES_TO_VISUALISE)
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d0.npz data/results/translate/figures/test_d0 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d0.npz data/results/rotate/figures/test_d0 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d1.npz data/results/translate/figures/test_d1 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d1.npz data/results/rotate/figures/test_d1 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d2.npz data/results/translate/figures/test_d2 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d2.npz data/results/rotate/figures/test_d2 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/train.npz data/results/translate/figures/train $(NUM_TRAIN_SET_IMAGES_TO_VISUALISE)
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/train.npz data/results/rotate/figures/train $(NUM_TRAIN_SET_IMAGES_TO_VISUALISE)
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d0.npz data/results/translate/figures/test_d0 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d0.npz data/results/rotate/figures/test_d0 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d1.npz data/results/translate/figures/test_d1 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d1.npz data/results/rotate/figures/test_d1 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d2.npz data/results/translate/figures/test_d2 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d2.npz data/results/rotate/figures/test_d2 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
 
 ## Create the Figure 3 image of the error curves
 visualise_result_curves:
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py data/results  data/results 8
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py data/results  data/results 8
 
 ## Create images, each one showing the result of all networks for a specific sample. Used to put together figure 4. Change the data type, the distance and the list of samples accordingly
 visualise_all_models_for_some_samples:
-	$(SET_CMD) CUDA_VISIBLE_DEVICES = $(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND = $(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_errors.py translate 0 "[10, 100, 200]" saved_models data/processed data/results/translate/all_models_samples
+	$(SET_CMD) CUDA_VISIBLE_DEVICES = $(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_errors.py translate 0 "[10, 100, 200]" saved_models data/processed data/results/translate/all_models_samples
 
 
 ## Create images showing the copying of pixels from the first N samples of both networks on both data sets over all distances
 visualise_copying:
-	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_5_copy_visualisations.py 100 saved_models data/processed data/results
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_5_copy_visualisations.py 100 saved_models data/processed data/results
 
 ## Delete all compiled Python files
 clean:

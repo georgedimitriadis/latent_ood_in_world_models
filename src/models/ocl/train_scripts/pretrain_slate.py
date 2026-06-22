@@ -41,22 +41,42 @@ class FlatImages(Dataset):
     """
     Reads the OCL h5 (num_tasks, N_pairs, 2, H, W, C) and serves individual
     images for autoencoder training. Colours already 0..255; we scale to [0,1].
+
+    Windows-safe: does NOT hold the array (or an open h5 handle) on the instance,
+    so the Dataset pickles cheaply when DataLoader spawns workers. Each worker
+    opens its own file handle lazily on first access.
     """
     def __init__(self, root, phase):
         import h5py
+        self.root = root
+        self.phase = phase
+        self._h5 = None
+        # read only the shape/length up front, then close.
         with h5py.File(root, 'r') as f:
-            data = f[phase][()]                      # (T, N_pairs, 2, H, W, C)
-        T, P, two, H, W, C = data.shape
-        self.imgs = data.reshape(T * P * two, H, W, C)
-        self.H, self.W, self.C = H, W, C
+            d = f[phase]
+            T, P, two, H, W, C = d.shape
+            self._len = T * P * two
+            self.H, self.W, self.C = H, W, C
+            self._P, self._two = P, two
+
+    def _ensure_open(self):
+        if self._h5 is None:
+            import h5py
+            self._h5 = h5py.File(self.root, 'r')[self.phase]
 
     def __getitem__(self, i):
-        x = torch.from_numpy(self.imgs[i]).float()   # (H, W, C)
+        self._ensure_open()
+        # map flat index back to (task, pair, side)
+        per_task = self._P * self._two
+        t, rem = divmod(i, per_task)
+        p, s = divmod(rem, self._two)
+        img = self._h5[t, p, s]                      # (H, W, C), uint
+        x = torch.from_numpy(np.asarray(img)).float()
         x = x.permute(2, 0, 1) / 255.0               # (C, H, W)
         return x
 
     def __len__(self):
-        return len(self.imgs)
+        return self._len
 
 
 def cosine_anneal(step, start, final, start_step, final_step):
@@ -85,7 +105,8 @@ def main():
     p.add_argument('--batch_size', type=int, default=64)
     p.add_argument('--epochs', type=int, default=50)
     p.add_argument('--clip', type=float, default=1.0)
-    p.add_argument('--num_workers', type=int, default=4)
+    p.add_argument('--num_workers', type=int, default=0,
+                   help='On Windows keep this 0 unless you have confirmed worker spawning works.')
     p.add_argument('--seed', type=int, default=0)
 
     p.add_argument('--lr_main', type=float, default=1e-4)
@@ -112,6 +133,12 @@ def main():
     p.add_argument('--mlp_hidden_size', type=int, default=192)
     p.add_argument('--img_channels', type=int, default=3)
     p.add_argument('--pos_channels', type=int, default=4)
+    p.add_argument('--log_every', type=int, default=50,
+                   help='Print a line every N batches (set 1 to confirm it is moving).')
+    p.add_argument('--max_steps', type=int, default=0,
+                   help='If >0, stop after this many optimizer steps (smoke test).')
+    p.add_argument('--amp', action='store_true',
+                   help='Use mixed-precision (float16) autocast on CUDA for speed.')
     args = p.parse_args()
 
     torch.manual_seed(args.seed)
@@ -134,6 +161,11 @@ def main():
     train_epoch_size = len(train_loader)
     best_val = math.inf
 
+    scaler = torch.cuda.amp.GradScaler(enabled=args.amp)
+    import time
+    global_step = 0
+    t_last = time.time()
+
     for epoch in range(args.epochs):
         model.train()
         for batch, images in enumerate(train_loader):
@@ -142,18 +174,30 @@ def main():
             warm = linear_warmup(step, 0., 1.0, 0, args.lr_warmup_steps)
             optimizer.param_groups[1]['lr'] = warm * args.lr_main
 
-            images = images.cuda()
-            recon, mse, ce, attns = model(images, tau, args.hard)
-            loss = mse + ce
+            images = images.cuda(non_blocking=True)
 
             optimizer.zero_grad()
-            loss.backward()
+            with torch.cuda.amp.autocast(enabled=args.amp):
+                recon, mse, ce, attns = model(images, tau, args.hard)
+                loss = mse + ce
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
             clip_grad_norm_(model.parameters(), args.clip, 'inf')
-            optimizer.step()
+            scaler.step(optimizer)
+            scaler.update()
 
-            if batch % max(1, train_epoch_size // 5) == 0:
+            global_step += 1
+            if batch % args.log_every == 0:
+                now = time.time()
+                rate = args.log_every / max(now - t_last, 1e-6) if batch > 0 else float('nan')
+                t_last = now
                 print(f'epoch {epoch+1} [{batch}/{train_epoch_size}] '
-                      f'loss={loss.item():.4f} mse={mse.item():.4f} ce={ce.item():.4f} tau={tau:.3f}')
+                      f'loss={loss.item():.4f} mse={mse.item():.4f} ce={ce.item():.4f} '
+                      f'tau={tau:.3f} {rate:.1f} batch/s')
+
+            if args.max_steps and global_step >= args.max_steps:
+                print(f'reached max_steps={args.max_steps}, stopping early.')
+                return
 
         # validation
         model.eval()
