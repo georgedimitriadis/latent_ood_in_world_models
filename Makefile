@@ -81,9 +81,9 @@ transform_data_to_ocl_compatible:
 ## PPretrain SLATE
 pretrain_slate:
 	@echo "Pretrain SLATE on translate train data"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/pretrain_slate.py --data_path data/processed/compositional_translate/train_clo.h5 --save_path saved_models/translate/slate_encoder_translate.pt.tar --image_size 32 --num_slots 3 --num_workers 7 --log_every 1 --amp
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/pretrain_slate.py --data_path data/processed/compositional_translate/train_clo.h5 --save_path saved_models/translate/slate_encoder_translate.pt.tar --image_size 32 --num_slots 3 --num_workers 7 --log_every 10 --vocab_size 128 --amp
 	@echo "Pretrain SLATE on rotate train data"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/pretrain_slate.py --data_path data/processed/compositional_rotate/train_clo.h5 --save_path saved_models/rotate/slate_encoder_rotate.pt.tar --image_size 32 --num_slots 3 --num_workers 7 --log_every 1 --amp
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/pretrain_slate.py --data_path data/processed/compositional_rotate/train_clo.h5 --save_path saved_models/rotate/slate_encoder_rotate.pt.tar --image_size 32 --num_slots 3 --num_workers 7 --log_every 10 --vocab_size 128 --amp
 
 ## Train OCL Model
 

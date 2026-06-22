@@ -19,6 +19,24 @@ Key detail for SLATE specifically:
   SLATE needs the Gumbel-Softmax temperature `tau` annealed from ~1.0 down to a
   small value over training, and the dVAE learning rate handled separately.
   This mirrors the original SLATE training recipe.
+
+Hyperparameter provenance:
+  Defaults below are taken from the original SLATE paper (Singh, Deng, Ahn,
+  ICLR 2022, arXiv 2110.11405), Table 7, 3D Shapes column — the simplest and
+  closest dataset to yours. Grounded values: batch size 50; peak LR 3e-4 with
+  30k warmup steps; dVAE LR 3e-4 with NO warmup; tau cooldown 1.0->0.1 over
+  30k steps; dropout 0.1; vocab 4096; transformer 4 layers / 4 heads; hidden
+  dim 192; slot attention 4 slots / 3 iterations / 1 head / dim 192.
+  The paper specifies training in STEPS, not epochs — there is no epoch count
+  to copy, so use --max_steps as the real stopping criterion.
+
+  *** CONSISTENCY WARNING ***
+  vocab_size, num_slots, slot_size, d_model, image_size, num_iterations,
+  num_slot_heads, and pos_channels MUST be identical here and in train_ocl.py,
+  because the OCL loads this encoder with strict=True. Note the shipped
+  train_ocl.py defaults to vocab_size=128 and num_slots=3, which DIFFER from
+  the paper-grounded vocab_size=4096 and num_slots=4 used here. Pick one set and
+  pass the SAME values to both scripts, or the checkpoint will fail to load.
 """
 
 import os
@@ -34,7 +52,7 @@ from torch.utils.data import Dataset, DataLoader
 import sys
 sys.path.append('../learners/')
 sys.path.append('../utils/')
-from models.ocl.utils.SLATE import SLATE  # the full autoencoder (encoder + transformer decoder)
+from SLATE import SLATE  # the full autoencoder (encoder + transformer decoder)
 
 
 class FlatImages(Dataset):
@@ -102,35 +120,51 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('--data_path', required=True, help='OCL h5 from convert_to_ocl.py')
     p.add_argument('--save_path', default='slate_encoder.pt.tar')
-    p.add_argument('--batch_size', type=int, default=64)
-    p.add_argument('--epochs', type=int, default=50)
+    # SLATE paper (Table 7, 3D Shapes column): batch size 50.
+    p.add_argument('--batch_size', type=int, default=50)
+    # The paper specifies training in STEPS, not epochs (no epoch count is given).
+    # Prefer --max_steps as the real stopping criterion; epochs is just an outer
+    # loop cap. The paper's schedules run on a 30k-step horizon, and FID training
+    # implies well beyond that. Set high and rely on max_steps / early-stopping.
+    p.add_argument('--epochs', type=int, default=1000)
     p.add_argument('--clip', type=float, default=1.0)
     p.add_argument('--num_workers', type=int, default=0,
                    help='On Windows keep this 0 unless you have confirmed worker spawning works.')
     p.add_argument('--seed', type=int, default=0)
 
-    p.add_argument('--lr_main', type=float, default=1e-4)
-    p.add_argument('--lr_dvae', type=float, default=3e-4)
-    p.add_argument('--lr_warmup_steps', type=int, default=30000)
+    # SLATE paper: peak LR 3e-4 for slot-attn encoder + transformer (with warmup),
+    # and a SEPARATE constant 3e-4 for the dVAE with NO warmup. The paper notes
+    # the constant 3e-4 dVAE LR was important for good patch discretization.
+    p.add_argument('--lr_main', type=float, default=3e-4)   # paper peak LR
+    p.add_argument('--lr_dvae', type=float, default=3e-4)   # paper dVAE LR, no warmup
+    p.add_argument('--lr_warmup_steps', type=int, default=30000)  # paper
 
-    # tau (Gumbel-Softmax) annealing
-    p.add_argument('--tau_start', type=float, default=1.0)
-    p.add_argument('--tau_final', type=float, default=0.1)
-    p.add_argument('--tau_steps', type=int, default=30000)
+    # tau (Gumbel-Softmax / DVAE temperature) annealing: paper cools 1.0 -> 0.1
+    # over 30000 steps.
+    p.add_argument('--tau_start', type=float, default=1.0)   # paper
+    p.add_argument('--tau_final', type=float, default=0.1)   # paper
+    p.add_argument('--tau_steps', type=int, default=30000)   # paper
     p.add_argument('--hard', action='store_true')
 
-    # must match what you will pass to the OCL
-    p.add_argument('--image_size', type=int, default=32)
-    p.add_argument('--vocab_size', type=int, default=128)
-    p.add_argument('--d_model', type=int, default=192)
-    p.add_argument('--dropout', type=float, default=0.1)
-    p.add_argument('--num_heads', type=int, default=4)
-    p.add_argument('--num_dec_blocks', type=int, default=4)
-    p.add_argument('--num_iterations', type=int, default=3)
-    p.add_argument('--num_slots', type=int, default=3)
-    p.add_argument('--num_slot_heads', type=int, default=1)
-    p.add_argument('--slot_size', type=int, default=192)
-    p.add_argument('--mlp_hidden_size', type=int, default=192)
+    # Architecture: must match what you pass to the OCL. Annotations show paper
+    # (3D Shapes) values vs. adaptations for your 32x32 two-colour dataset.
+    p.add_argument('--image_size', type=int, default=32)     # paper used 64; yours is 32
+    # Paper vocab = 4096 for 64x64 natural-ish scenes. Your images are far simpler
+    # (flat colours, few objects), so a large codebook is wasteful and slow. 4096
+    # is the grounded value; 128-512 is a reasonable reduction for your data. Kept
+    # at the paper default here for fidelity — lower it if dVAE training is slow.
+    p.add_argument('--vocab_size', type=int, default=4096)   # paper (3D Shapes)
+    p.add_argument('--d_model', type=int, default=192)       # paper hidden dim
+    p.add_argument('--dropout', type=float, default=0.1)     # paper
+    p.add_argument('--num_heads', type=int, default=4)       # paper transformer heads
+    p.add_argument('--num_dec_blocks', type=int, default=4)  # paper transformer layers
+    p.add_argument('--num_iterations', type=int, default=3)  # paper slot iterations
+    # Paper used 4 slots for 3D Shapes. Your scenes have 1-2 objects + frame, so 3
+    # is a reasonable reduction; 4 matches the paper exactly.
+    p.add_argument('--num_slots', type=int, default=4)       # paper (3D Shapes)
+    p.add_argument('--num_slot_heads', type=int, default=1)  # paper
+    p.add_argument('--slot_size', type=int, default=192)     # paper slot dim
+    p.add_argument('--mlp_hidden_size', type=int, default=192)  # matches slot dim
     p.add_argument('--img_channels', type=int, default=3)
     p.add_argument('--pos_channels', type=int, default=4)
     p.add_argument('--log_every', type=int, default=50,
@@ -192,6 +226,7 @@ def main():
                 rate = args.log_every / max(now - t_last, 1e-6) if batch > 0 else float('nan')
                 t_last = now
                 print(f'epoch {epoch+1} [{batch}/{train_epoch_size}] '
+                      f'steps {global_step} in {args.max_steps} '
                       f'loss={loss.item():.4f} mse={mse.item():.4f} ce={ce.item():.4f} '
                       f'tau={tau:.3f} {rate:.1f} batch/s')
 
