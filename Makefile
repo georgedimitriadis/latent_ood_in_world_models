@@ -71,6 +71,22 @@ create_data:
 	@echo "Making rotate test distance 2 set"
 	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TEST_BATCHES) data/processed/compositional_rotate/test_d2.npz generate_compositional_datasets "{\"distance\":2, \"symmetric_objects\":0, \"transformation_type\": \"rotate\"}"
 
+## Create OCL compatible datasets
+transform_data_to_ocl_compatible:
+	@echo "Transforming train set to OCL train-val"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES="" $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/generate_datasets_main.py $(NUM_TRAIN_BATCHES) data/processed/compositional_translate/train.npz generate_compositional_datasets "{\"distance\":0, \"symmetric_objects\":1, \"transformation_type\": \"translate\"}"
+
+
+## OCL Related
+## PPretrain SLATE
+pretrain_slate:
+	@echo "Pretrain SLATE on translate train data"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/train_slate.py --data_path data/processed/compositional_translate/train_clo.h5 --save_path saved_models/translate/slate_encoder_translate.pt.tar --image_size 32 --num_slots 3
+	@echo "Pretrain SLATE on rotate train data"
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE) $(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND) $(AND_CMD) $(SET_CMD) PYTHONPATH=./src $(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/train_slate.py --data_path data/processed/compositional_rotate/train_clo.h5 --save_path saved_models/rotate/slate_encoder_translate.pt.tar --image_size 32 --num_slots 3
+
+## Train OCL Model
+
 
 ## Train all models
 train_models:
