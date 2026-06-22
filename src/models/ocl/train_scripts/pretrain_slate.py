@@ -52,7 +52,7 @@ from torch.utils.data import Dataset, DataLoader
 import sys
 sys.path.append('../learners/')
 sys.path.append('../utils/')
-from SLATE import SLATE  # the full autoencoder (encoder + transformer decoder)
+from models.ocl.utils.SLATE import SLATE  # the full autoencoder (encoder + transformer decoder)
 
 
 class FlatImages(Dataset):
