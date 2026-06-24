@@ -12,30 +12,32 @@ from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 import sys
+
 sys.path.append('../utils/')
 from models.ocl.utils.create_dataset import *
+
 sys.path.append('../learners/')
 from models.ocl.learners.ocl import OCL
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--num_workers', type=int, default=1)
+parser.add_argument('--num_workers', type=int, default=7)
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--epochs', type=int, default=30)
+parser.add_argument('--epochs', type=int, default=150)
 parser.add_argument('--patience', type=int, default=4)
 parser.add_argument('--clip', type=float, default=1.0)
-parser.add_argument('--image_size', type=int, default=64)
+parser.add_argument('--image_size', type=int, default=32)
 
-parser.add_argument('--dataset', type=str, default='shapes3d')
-parser.add_argument('--checkpoint_path',type=str,default='checkpoint.pt.tar')
-parser.add_argument('--slate_encoder_path',type=str,default='slate_encoder.pt.tar')
-parser.add_argument('--log_path', default='./logs_dir/')
-parser.add_argument('--data_path', default='./datasets/shapes3d/train.h5')
+parser.add_argument('--dataset', type=str, default='arcpairs')
+parser.add_argument('--checkpoint_path', type=str, default='saved_models/translate/checkpoint.pt.tar')
+parser.add_argument('--slate_encoder_path', type=str, default='saved_models/translate/slate_encoder.pt.tar')
+parser.add_argument('--log_path', default='saved_models/translate')
+parser.add_argument('--data_path', default='data/processed/compositional_translate/train_clo.h5')
 
 parser.add_argument('--lr_main', type=float, default=1e-4)
 parser.add_argument('--lr_slate_encoder', type=float, default=1e-5)
-parser.add_argument('--lr_warmup_steps', type=int, default=30000)
+parser.add_argument('--lr_warmup_steps', type=int, default=15000)
 
 parser.add_argument('--num_heads', type=int, default=4)
 parser.add_argument('--num_enc_heads', type=int, default=4)
@@ -64,24 +66,21 @@ random.seed(args.seed)
 arg_str_list = ['{}={}'.format(k, v) for k, v in vars(args).items()]
 arg_str = '__'.join(arg_str_list)
 filename = os.path.basename(args.data_path)
-log_dir = os.path.join(args.log_path, args.dataset,filename[:-3] +'_ours_'+str(args.seed))
+log_dir = os.path.join(args.log_path, args.dataset, filename[:-3] + '_ours_' + str(args.seed))
 
 writer = SummaryWriter(log_dir)
 writer.add_text('hparams', arg_str)
 
-
 transform = transforms.Compose(
-        [
-            transforms.Resize(args.image_size),
-            transforms.CenterCrop(args.image_size),
-        ]
+    [
+        transforms.Resize(args.image_size),
+        transforms.CenterCrop(args.image_size),
+    ]
 )
-
 
 train_dataset = ARCPairs(root=args.data_path, phase='train', transform=transform)
 val_dataset = ARCPairs(root=args.data_path, phase='val', transform=transform)
 
-    
 train_sampler = None
 val_sampler = None
 
@@ -111,13 +110,13 @@ if os.path.isfile(args.checkpoint_path):
     best_epoch = checkpoint['best_epoch']
     stagnation_counter = checkpoint['stagnation_counter']
     lr_decay_factor = checkpoint['lr_decay_factor']
-    model.load_state_dict(checkpoint['model'],strict= False)
+    model.load_state_dict(checkpoint['model'], strict=False)
 
 elif os.path.isfile(args.slate_encoder_path):
-    
+
     print('Loading SLATE encoder from checkpoint')
     checkpoint_SLATE_encoder = torch.load(args.slate_encoder_path, map_location='cpu')
-    model.slate_encoder.load_state_dict(checkpoint_SLATE_encoder,strict=True)
+    model.slate_encoder.load_state_dict(checkpoint_SLATE_encoder, strict=True)
     checkpoint = None
     start_epoch = 0
     best_val_loss = math.inf
@@ -134,7 +133,6 @@ else:
     stagnation_counter = 0
     lr_decay_factor = 1.0
 
-
 model = model.cuda()
 
 optimizer = Adam([
@@ -143,27 +141,24 @@ optimizer = Adam([
 ])
 
 if checkpoint is not None:
-
     optimizer.load_state_dict(checkpoint['optimizer'])
 
- 
-def augment_analogy(analogies):
 
+def augment_analogy(analogies):
     B, num_examples, _, C, H, W = analogies.shape
     target_ind = random.choice(range(num_examples))
-    target = analogies[:,target_ind,:,:,:,:].unsqueeze(1)
+    target = analogies[:, target_ind, :, :, :, :].unsqueeze(1)
     other_inds = [i for i in range(num_examples) if i != target_ind]
-    other = analogies[:,other_inds,:,:,:,:]
-    #concatenate target and other
-    analogies_augmented = torch.cat([other,target],dim=1)    
+    other = analogies[:, other_inds, :, :, :, :]
+    # concatenate target and other
+    analogies_augmented = torch.cat([other, target], dim=1)
     return analogies_augmented
 
 
 def linear_warmup(step, start_value, peak_value, start_step, peak_step):
-    
     assert start_value <= peak_value
     assert start_step <= peak_step
-    
+
     if step < start_step:
         value = start_value
 
@@ -180,10 +175,9 @@ def linear_warmup(step, start_value, peak_value, start_step, peak_step):
 
 
 def cosine_anneal(step, start_value, final_value, start_step, final_step):
-    
     assert start_value >= final_value
     assert start_step <= final_step
-    
+
     if step < start_step:
         value = start_value
     elif step >= final_step:
@@ -193,23 +187,22 @@ def cosine_anneal(step, start_value, final_value, start_step, final_step):
         b = 0.5 * (start_value + final_value)
         progress = (step - start_step) / (final_step - start_step)
         value = a * math.cos(math.pi * progress) + b
-    
+
     return value
 
 
 def visualize_generation(images, gen, N=8):
-
     B, num_example, _, C, H, W = images.shape
     images_N = images[:N,].clone()
     gen = gen[:N]
-    gt = images_N[:,-1,1].unsqueeze(1).clone()
-    images_N[:,-1,1] = gen.reshape(N, C, H, W)
-    images_N = images_N[:,-2:].reshape(N,-1, C, H, W)
-    vis  = torch.cat((images_N,gt),1)
+    gt = images_N[:, -1, 1].unsqueeze(1).clone()
+    images_N[:, -1, 1] = gen.reshape(N, C, H, W)
+    images_N = images_N[:, -2:].reshape(N, -1, C, H, W)
+    vis = torch.cat((images_N, gt), 1)
     return vis.reshape(-1, 3, H, W)
 
-def visualize_slots(image, attns, N=8):
 
+def visualize_slots(image, attns, N=8):
     _, _, H, W = image.shape
     image = image[:N].expand(-1, 3, H, W).unsqueeze(dim=1)
     attns = attns[:N].expand(-1, -1, 3, H, W)
@@ -217,11 +210,10 @@ def visualize_slots(image, attns, N=8):
     return torch.cat((image, attns), dim=1).view(-1, 3, H, W)
 
 
-
 for epoch in range(start_epoch, args.epochs):
-    
+
     model.train()
-    
+
     for batch, images in enumerate(train_loader):
 
         global_step = epoch * train_epoch_size + batch
@@ -232,14 +224,14 @@ for epoch in range(start_epoch, args.epochs):
             1.0,
             0,
             args.lr_warmup_steps,
-           )
-        
-        optimizer.param_groups[1]['lr'] = lr_decay_factor*lr_warmup_factor*args.lr_main
-        optimizer.param_groups[0]['lr'] = lr_decay_factor*args.lr_slate_encoder
+        )
+
+        optimizer.param_groups[1]['lr'] = lr_decay_factor * lr_warmup_factor * args.lr_main
+        optimizer.param_groups[0]['lr'] = lr_decay_factor * args.lr_slate_encoder
         images = images.cuda()
         B, _, _, C, H, W = images.shape
         images = augment_analogy(images)
-        recon, mse, ce, attns = model(images[:,:-1],images[:,-1], args.tau, args.hard)
+        recon, mse, ce, attns = model(images[:, :-1], images[:, -1], args.tau, args.hard)
         optimizer.zero_grad()
         loss = mse + ce
         loss.backward()
@@ -249,39 +241,38 @@ for epoch in range(start_epoch, args.epochs):
         with torch.no_grad():
             if batch % log_interval == 0:
                 print('Train Epoch: {:3} [{:5}/{:5}] \t Loss: {:F}'.format(
-                      epoch+1, batch, train_epoch_size, loss.item()))
+                    epoch + 1, batch, train_epoch_size, loss.item()))
                 writer.add_scalar('TRAIN/ce', ce.item(), global_step)
                 writer.add_scalar('TRAIN/mse', mse.item(), global_step)
                 writer.add_scalar('TRAIN/loss', loss.item(), global_step)
                 writer.add_scalar('TRAIN/lr_main', optimizer.param_groups[1]['lr'], global_step)
                 writer.add_scalar('TRAIN/lr_slate_encoder', optimizer.param_groups[0]['lr'], global_step)
 
-    support = images[:,:-1]
-    query = images[:,-1,0]
+    support = images[:, :-1]
+    query = images[:, -1, 0]
 
     with torch.no_grad():
 
         gen = model.generate(support, query)
         vis_recon = visualize_generation(images, gen)
-        grid = vutils.make_grid(vis_recon, nrow=5, pad_value=0.2)#A:B::C:D
-        writer.add_image('TRAIN_analogy/epoch={:03}'.format(epoch+1), grid)
+        grid = vutils.make_grid(vis_recon, nrow=5, pad_value=0.2)  # A:B::C:D
+        writer.add_image('TRAIN_analogy/epoch={:03}'.format(epoch + 1), grid)
 
         images = images.reshape(-1, C, H, W)
         vis_slots = visualize_slots(images, attns)
-        grid = vutils.make_grid(vis_slots, nrow=1+args.num_slots, pad_value=0.2)
-        writer.add_image('TRAIN_slots/epoch={:03}'.format(epoch+1), grid)
- 
+        grid = vutils.make_grid(vis_slots, nrow=1 + args.num_slots, pad_value=0.2)
+        writer.add_image('TRAIN_slots/epoch={:03}'.format(epoch + 1), grid)
+
     with torch.no_grad():
 
         model.eval()
         val_ce = 0.0
         val_mse = 0.0
-        
-        for batch, images in enumerate(val_loader):
 
+        for batch, images in enumerate(val_loader):
             images = images.cuda()
-            B, num_relations, num_examples ,C ,H ,W = images.shape
-            recon, mse, ce, attns = model(images[:,:-1], images[:,-1], args.tau, args.hard)
+            B, num_relations, num_examples, C, H, W = images.shape
+            recon, mse, ce, attns = model(images[:, :-1], images[:, -1], args.tau, args.hard)
             val_ce += ce.item()
             val_mse += mse.item()
 
@@ -289,12 +280,12 @@ for epoch in range(start_epoch, args.epochs):
         val_mse /= (val_epoch_size)
         val_loss = val_ce + val_mse
 
-        writer.add_scalar('VAL/mse', val_mse, epoch+1)
-        writer.add_scalar('VAL/ce', val_ce, epoch+1)
-        writer.add_scalar('VAL/loss', val_loss, epoch+1)
+        writer.add_scalar('VAL/mse', val_mse, epoch + 1)
+        writer.add_scalar('VAL/ce', val_ce, epoch + 1)
+        writer.add_scalar('VAL/loss', val_loss, epoch + 1)
 
         print('====> Epoch: {:3} \t Loss = {:F}'.format(
-                epoch+1, val_loss))
+            epoch + 1, val_loss))
 
         if val_loss < best_val_loss:
 
@@ -305,26 +296,25 @@ for epoch in range(start_epoch, args.epochs):
             torch.save(model.state_dict(), os.path.join(log_dir, 'best_model.pt'))
 
             if epoch >= 20:
-
-                support = images[:,:-1]
-                query = images[:,-1,0]
+                support = images[:, :-1]
+                query = images[:, -1, 0]
                 gen = model.generate(support, query)
                 vis_recon = visualize_generation(images, gen)
-                grid = vutils.make_grid(vis_recon, nrow=5, pad_value=0.2)#A:B::C:D
-                writer.add_image('VAL_analogy/epoch={:03}'.format(epoch+1), grid)
+                grid = vutils.make_grid(vis_recon, nrow=5, pad_value=0.2)  # A:B::C:D
+                writer.add_image('VAL_analogy/epoch={:03}'.format(epoch + 1), grid)
 
                 images = images.reshape(-1, C, H, W)
                 vis_slots = visualize_slots(images, attns)
-                grid = vutils.make_grid(vis_slots, nrow=1+args.num_slots, pad_value=0.2)
-                writer.add_image('VAL_slots/epoch={:03}'.format(epoch+1), grid)
-                
+                grid = vutils.make_grid(vis_slots, nrow=1 + args.num_slots, pad_value=0.2)
+                writer.add_image('VAL_slots/epoch={:03}'.format(epoch + 1), grid)
+
         else:
             stagnation_counter += 1
             if stagnation_counter >= args.patience:
                 lr_decay_factor = lr_decay_factor / 2.0
                 stagnation_counter = 0
 
-        writer.add_scalar('VAL/best_loss', best_val_loss, epoch+1)
+        writer.add_scalar('VAL/best_loss', best_val_loss, epoch + 1)
 
         checkpoint = {
             'epoch': epoch + 1,
