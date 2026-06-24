@@ -5,13 +5,14 @@ import torch
 import random
 import torchvision.utils as vutils
 from torchvision import datasets, transforms, utils
-from datetime import datetime
 from torch.optim import Adam
-import torch.nn as nn
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 import sys
+from tqdm import tqdm
+
+from models.ocl.utils.test_time_eval import build_palette_tensor, evaluate_generation
 
 sys.path.append('../utils/')
 from models.ocl.utils.create_dataset import *
@@ -33,7 +34,7 @@ parser.add_argument('--dataset', type=str, default='arcpairs')
 parser.add_argument('--checkpoint_path', type=str, default='saved_models/translate/checkpoint.pt.tar')
 parser.add_argument('--slate_encoder_path', type=str, default='saved_models/translate/slate_encoder.pt.tar')
 parser.add_argument('--log_path', default='saved_models/translate')
-parser.add_argument('--data_path', default='data/processed/compositional_translate/train_clo.h5')
+parser.add_argument('--data_path', default='data/processed/compositional_translate')
 
 parser.add_argument('--lr_main', type=float, default=1e-4)
 parser.add_argument('--lr_slate_encoder', type=float, default=1e-5)
@@ -65,8 +66,9 @@ random.seed(args.seed)
 
 arg_str_list = ['{}={}'.format(k, v) for k, v in vars(args).items()]
 arg_str = '__'.join(arg_str_list)
-filename = os.path.basename(args.data_path)
-log_dir = os.path.join(args.log_path, args.dataset, filename[:-3] + '_ours_' + str(args.seed))
+#filename = os.path.basename(args.data_path)
+log_dir = os.path.join(args.log_path, args.dataset,
+                       os.path.basename(args.data_path.rstrip('/\\')) + '_ours_' + str(args.seed))
 
 writer = SummaryWriter(log_dir)
 writer.add_text('hparams', arg_str)
@@ -78,11 +80,13 @@ transform = transforms.Compose(
     ]
 )
 
-train_dataset = ARCPairs(root=args.data_path, phase='train', transform=transform)
-val_dataset = ARCPairs(root=args.data_path, phase='val', transform=transform)
+train_dataset = ARCPairs(root=os.path.join(args.data_path, 'train_clo.h5'), phase='train', transform=transform)
+val_dataset = ARCPairs(root=os.path.join(args.data_path, 'train_clo.h5'), phase='val', transform=transform)
+test_datasets = [ARCPairs(root=os.path.join(args.data_path, f'test_d{i}_clo.h5'), phase='train', transform=transform) for i in range(3)]
 
 train_sampler = None
 val_sampler = None
+test_sampler = None
 
 loader_kwargs = {
     'batch_size': args.batch_size,
@@ -94,6 +98,15 @@ loader_kwargs = {
 
 train_loader = DataLoader(train_dataset, sampler=train_sampler, **loader_kwargs)
 val_loader = DataLoader(val_dataset, sampler=val_sampler, **loader_kwargs)
+
+test_loader_kwargs = {
+    'batch_size': args.batch_size,
+    'shuffle': False,
+    'num_workers': args.num_workers,
+    'pin_memory': True,
+    'drop_last': False,
+}
+test_loaders = [DataLoader(test_datasets[i], sampler=test_sampler, **test_loader_kwargs) for i in range(3)]
 
 train_epoch_size = len(train_loader)
 val_epoch_size = len(val_loader)
@@ -209,6 +222,15 @@ def visualize_slots(image, attns, N=8):
 
     return torch.cat((image, attns), dim=1).view(-1, 3, H, W)
 
+# build ONCE, before the epoch loop. Use the same colours your data uses
+# (the values from convert_to_ocl.py's PALETTE for the codes present).
+palette = build_palette_tensor(
+    [(255,255,255),   # white surround (code 0)
+     (0,0,0),         # black canvas (code 1)
+     (0,116,217),     # blue (2)
+     (255,65,54),     # red (3)
+     (255,220,0)],    # yellow (5)  -- include only colours that appear
+    device='cuda')
 
 for epoch in range(start_epoch, args.epochs):
 
@@ -287,6 +309,14 @@ for epoch in range(start_epoch, args.epochs):
         print('====> Epoch: {:3} \t Loss = {:F}'.format(
             epoch + 1, val_loss))
 
+        val_gen = evaluate_generation(model, val_loader, palette, device='cuda')
+        writer.add_scalar('VAL/exact_match', val_gen['exact_match'], epoch + 1)
+        writer.add_scalar('VAL/pixel_acc', val_gen['pixel_acc'], epoch + 1)
+        writer.add_scalar('VAL/gen_mse', val_gen['mse'], epoch + 1)
+        print(f'  val: exact={val_gen["exact_match"]:.3f} '
+              f'pixel_acc={val_gen["pixel_acc"]:.3f} gen_mse={val_gen["mse"]:.4f} '
+              f'(n={val_gen["n"]})')
+
         if val_loss < best_val_loss:
 
             stagnation_counter = 0
@@ -329,5 +359,14 @@ for epoch in range(start_epoch, args.epochs):
         torch.save(checkpoint, os.path.join(log_dir, 'checkpoint.pt.tar'))
 
         print('====> Best Loss = {:F} @ Epoch {}'.format(best_val_loss, best_epoch))
+
+        for distance in tqdm([0, 1, 2]):
+            test_loader = test_loaders[distance]
+            m = evaluate_generation(model, test_loader, palette, device='cuda')
+            writer.add_scalar(f'TEST_d{distance}/mse', m['mse'], epoch + 1)
+            writer.add_scalar(f'TEST_d{distance}/exact_match', m['exact_match'], epoch + 1)
+            writer.add_scalar(f'TEST_d{distance}/pixel_acc', m['pixel_acc'], epoch + 1)
+            print(f'  test_d{distance}: exact={m["exact_match"]:.3f} '
+                  f'pixel_acc={m["pixel_acc"]:.3f} mse={m["mse"]:.4f} (n={m["n"]})')
 
 writer.close()
