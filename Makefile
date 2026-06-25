@@ -103,9 +103,9 @@ transform_data_to_ocl_compatible:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/convert_to_ocl.py --translate_npz data/processed/compositional_translate/train.npz --rotate_npz data/processed/compositional_rotate/train.npz --translate_h5 data/processed/compositional_translate/train_clo.h5 --rotate_h5 data/processed/compositional_rotate/train_clo.h5 --val_frac 0.2
 	@echo "Transforming test_d0 set to OCL test_d0"
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/convert_to_ocl.py --translate_npz data/processed/compositional_translate/test_d0.npz --rotate_npz data/processed/compositional_rotate/test_d0.npz --translate_h5 data/processed/compositional_translate/test_d0_clo.h5 --rotate_h5 data/processed/compositional_rotate/test_d0_clo.h5 --val_frac 0
-	@echo "Transforming test_d0 set to OCL test_d0"
+	@echo "Transforming test_d1 set to OCL test_d1"
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/convert_to_ocl.py --translate_npz data/processed/compositional_translate/test_d1.npz --rotate_npz data/processed/compositional_rotate/test_d1.npz --translate_h5 data/processed/compositional_translate/test_d1_clo.h5 --rotate_h5 data/processed/compositional_rotate/test_d1_clo.h5 --val_frac 0
-	@echo "Transforming test_d0 set to OCL test_d0"
+	@echo "Transforming test_d2 set to OCL test_d2"
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/data/generation/convert_to_ocl.py --translate_npz data/processed/compositional_translate/test_d2.npz --rotate_npz data/processed/compositional_rotate/test_d2.npz --translate_h5 data/processed/compositional_translate/test_d2_clo.h5 --rotate_h5 data/processed/compositional_rotate/test_d2_clo.h5 --val_frac 0
 
 ## PPretrain SLATE
@@ -116,11 +116,13 @@ pretrain_slate:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/pretrain_slate.py --data_path data/processed/compositional_rotate/train_clo.h5 --save_path saved_models/rotate/slate_encoder_rotate.pt.tar --image_size 32 --num_slots 3 --vocab_size 128 --num_workers 40 --max_steps 30000 --log_every 10 --amp
 
 ## Train OCL Model
-train_ocl:
+train_ocl_translate:
 	@echo "Train OCL on translate data"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/train_ocl.py --num_workers 40 --dataset arcpairs --data_path data/processed/compositional_translate/train_clo.h5 --slate_encoder_path saved_models/translate/slate_encoder_translate.pt.tar --checkpoint_path saved_models/translate --log_path saved_models/translate
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/train_ocl.py --num_workers 40 --dataset arcpairs --data_path data/processed/compositional_translate --slate_encoder_path saved_models/translate/slate_encoder_translate.pt.tar --checkpoint_path saved_models/translate --log_path saved_models/translate
+
+train_ocl_rotate:
 	@echo "Train OCL on rotate data"
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/train_ocl.py --num_workers 40 --dataset arcpairs --data_path data/processed/compositional_translate/train_clo.h5 --slate_encoder_path saved_models/rotate/slate_encoder_translate.pt.tar --checkpoint_path saved_models/rotate --log_path saved_models/rotate
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) KERAS_BACKEND=$(BACKEND)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/models/ocl/train_scripts/train_ocl.py --num_workers 40 --dataset arcpairs --data_path data/processed/compositional_rotate --slate_encoder_path saved_models/rotate/slate_encoder_rotate.pt.tar --checkpoint_path saved_models/rotate --log_path saved_models/rotate
 
 # ================
 
