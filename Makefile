@@ -147,7 +147,11 @@ visualise_result_curves:
 
 ## Create the Figure 4 image of the OCL error curves
 visualise_ocl_result_curves:
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_ocl_results.py data/results/translate/arcpairs/compositional_translate_ours_0/events.out.tfevents.1782798734.cseeblg2.1712846.0  data/results/rotate/arcpairs/compositional_rotate_ours_0/events.out.tfevents.1782798763.cseeblg2.1712935.0 data/results data/results 8
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_ocl_results.py data/results/translate/arcpairs/compositional_translate_ours_0/events.out.tfevents.1782798734.cseeblg2.1712846.0  data/results/rotate/arcpairs/compositional_rotate_ours_0/events.out.tfevents.1782798763.cseeblg2.1712935.0 data/results data/results 8
+
+
+visualise_ocl_test_data:
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/ocl_all_test_data_images.py saved_models data/processed
 
 
 ## Create images, each one showing the result of all networks for a specific sample. Used to put together figure 4. Change the data type, the distance and the list of samples accordingly
