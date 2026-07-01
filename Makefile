@@ -147,7 +147,7 @@ visualise_result_curves:
 
 ## Create the Figure 4 image of the OCL error curves
 visualise_ocl_result_curves:
-	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_ocl_results.py data/results/translate/arcpairs/compositional_translate_ours_0/events.out.tfevents.1782296422.cseeblg2.1402481.0  data/results/rotate/arcpairs/compositional_rotate_ours_0/events.out.tfevents.1782296788.cseeblg2.1408796.0 data/results data/results 8
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_ocl_results.py data/results/translate/arcpairs/compositional_translate_ours_0/events.out.tfevents.1782798734.cseeblg2.1712846.0  data/results/rotate/arcpairs/compositional_rotate_ours_0/events.out.tfevents.1782798763.cseeblg2.1712935.0 data/results data/results 8
 
 
 ## Create images, each one showing the result of all networks for a specific sample. Used to put together figure 4. Change the data type, the distance and the list of samples accordingly

@@ -4,9 +4,10 @@ from pathlib import Path
 
 import click
 import numpy as np
-import matplotlib.pyplot as plt
-from src.experiments.analysis.tensorboard_events_reader import get_dfs_from_events
+
+from experiments.analysis.tensorboard_events_reader import get_dfs_from_events
 from experiments.analysis.scripts_for_images.figure_3_results import collect_data_results
+import matplotlib.pyplot as plt
 
 @click.command()
 @click.argument('translate_event_file', type=click.Path())
