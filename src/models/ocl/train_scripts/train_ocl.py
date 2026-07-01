@@ -31,7 +31,7 @@ parser.add_argument('--clip', type=float, default=1.0)
 parser.add_argument('--image_size', type=int, default=32)
 
 parser.add_argument('--dataset', type=str, default='arcpairs')
-parser.add_argument('--checkpoint_path', type=str, default='saved_models/translate/checkpoint.pt.tar')
+parser.add_argument('--checkpoint_path', type=str, default=None)
 parser.add_argument('--slate_encoder_path', type=str, default='saved_models/translate/slate_encoder.pt.tar')
 parser.add_argument('--log_path', default='saved_models/translate')
 parser.add_argument('--data_path', default='data/processed/compositional_translate')

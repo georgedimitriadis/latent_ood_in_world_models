@@ -2,12 +2,35 @@
 import os
 from pathlib import Path
 from os.path import join
+from typing import List
+
 import click
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import scipy.stats as st
 
+
+def collect_data_results(results_path: str, num_of_distances:int, data_types:List, model_types:List, iterations: int):
+    f = join(results_path, 'translate', 'logs', f'run_{0}', f'log_translate_axial_pointer_network_lines.csv')
+    raw_results = pd.read_csv(f, usecols=[1, 4], skiprows=[0, 0], names=['error', 'distance'])
+    num_of_epochs = len(raw_results) // num_of_distances
+
+    all_results = {}
+    for data_type in data_types:
+        all_results[data_type] = {d:[] for d in range(num_of_distances)}
+        for model in model_types:
+            model_iteration_results = np.zeros((num_of_epochs, iterations, 3))
+            for iteration in range(iterations):
+                f = join(results_path, data_type, 'logs', f'run_{iteration}', f'log_{data_type}_{model}.csv')
+                raw_results = pd.read_csv(f, usecols=[1, 4], skiprows=[0, 0], names=['error', 'distance'])
+                for d in range(num_of_distances):
+                    model_iteration_results[:, iteration, d] = raw_results['error'][
+                        raw_results['distance'] == d].to_numpy()
+            for d in range(num_of_distances):
+                all_results[data_type][d].append(model_iteration_results[:, :, d])
+
+    return all_results, num_of_epochs
 
 @click.command()
 @click.argument('results_path', type=click.Path())
@@ -19,23 +42,7 @@ def main(results_path: str, save_figure_path: str, iterations: int):
     model_names = ['Axial Pointer Linear', 'Axial Pointer', 'CNN', 'MLP', 'Transformer']
     num_of_distances = 3
 
-    # Find number of epochs
-    f = join(results_path, 'translate', 'logs', f'run_{0}', f'log_translate_axial_pointer_network_lines.csv')
-    raw_results = pd.read_csv(f, usecols=[1, 4], skiprows=[0, 0], names=['error', 'distance'])
-    num_of_epochs = len(raw_results) // num_of_distances
-
-    all_results = {}
-    for data_type in data_types:
-        all_results[data_type] = {0: [], 1: [], 2: []}
-        for model in model_types:
-            model_iteration_results = np.zeros((num_of_epochs, iterations, 3))
-            for iteration in range(iterations):
-                f = join(results_path, data_type, 'logs', f'run_{iteration}', f'log_{data_type}_{model}.csv')
-                raw_results = pd.read_csv(f, usecols=[1, 4], skiprows=[0, 0], names=['error', 'distance'])
-                for d in range(num_of_distances):
-                    model_iteration_results[:, iteration, d] = raw_results['error'][raw_results['distance'] == d].to_numpy()
-            for d in range(num_of_distances):
-                all_results[data_type][d].append(model_iteration_results[:, :, d])
+    all_results, num_of_epochs = collect_data_results(results_path, num_of_distances, data_types, model_types, iterations)
 
     fig = plt.figure(constrained_layout=False, figsize=(15, 10), dpi=50)
     subfigs = fig.subfigures(nrows=2, ncols=1)
