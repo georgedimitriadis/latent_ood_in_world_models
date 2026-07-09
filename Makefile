@@ -153,6 +153,8 @@ visualise_ocl_result_curves:
 visualise_ocl_test_data:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/ocl_all_test_data_images.py saved_models data/processed
 
+categorise_ocl_test_results:
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/ocl_related/ocl_error_types.py saved_models data/processed
 
 ## Create images, each one showing the result of all networks for a specific sample. Used to put together figure 4. Change the data type, the distance and the list of samples accordingly
 visualise_all_models_for_some_samples:

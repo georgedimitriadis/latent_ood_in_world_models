@@ -148,6 +148,11 @@ else:
 
 model = model.cuda()
 
+total_params = sum(p.numel() for p in model.parameters())
+trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+print(f'Total number of parameters = {total_params}')
+print(f'Trainable parameters = {trainable_params}')
+
 optimizer = Adam([
     {'params': (x[1] for x in model.named_parameters() if 'slate_encoder' in x[0]), 'lr': args.lr_slate_encoder},
     {'params': (x[1] for x in model.named_parameters() if 'slate_encoder' not in x[0]), 'lr': args.lr_main},
