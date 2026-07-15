@@ -1,15 +1,42 @@
 
+
+"""
+Classify OCL test results into categories 1-5 and detect the ground-truth rule
+for every sample by exact forward rendering.
+
+Requires apply_rule_v2.py (the forward renderer with canonical shape
+completion) in the same directory.
+
+Categories (gen_idx vs target_idx):
+  1 = identical
+  2 = same shape, followed rule (correct position), wrong color
+  3 = different shape, followed rule (correct position), color ignored
+  4 = same shape, did not follow rule (wrong position), color ignored
+  5 = neither
+
+Rule detection: for each sample, the query object is completed to its canonical
+shape and each of the family's two rules is rendered forward; the rule whose
+output equals target_idx pixel-for-pixel is the ground truth. This is exact and
+unambiguous on all 5994 samples.
+
+Usage:  python classify_ocl_results_v2.py ocl_test_results.pcl
+   or:  from classify_ocl_results_v2 import analyze_all_results
+"""
+
 from experiments.analysis.ocl_related.get_ocl_test_data import get_ocl_results
 import pickle
 import numpy as np
 from os.path import join
 from pathlib import Path
-from collections import Counter
+from collections import Counter, defaultdict
 import click
 import pandas as pd
+from metrics.metric_validation import apply_rule, complete_object
 
 BACKGROUND = 0
 CANVAS = 1
+BITS_TO_NAME = {(0, 0): 'up6', (0, 1): 'left6', (1, 0): 'rot90ccw', (1, 1): 'rot180'}
+FAMILY_BITS = {'translate': [(0, 0), (0, 1)], 'rotate': [(1, 0), (1, 1)]}
 CATEGORY_DESCRIPTIONS = ['Fully correct', 'Correct shape and rule - Wrong colour', 'Correct rule - Wrong shape', 'Correct shape - Wrong rule', 'All (shape and rule) Wrong']
 
 def create_results(saved_models_path, processed_data_path, pickle_file_dir):
@@ -20,181 +47,39 @@ def create_results(saved_models_path, processed_data_path, pickle_file_dir):
     with open(pickle_file, 'wb') as f:
         pickle.dump(all_results, f)
 
-def object_mask(img):
-    return ~np.isin(img, [BACKGROUND, CANVAS])
-
-def canvas_mask(img):
-    return img != BACKGROUND
-
-def bbox_of(mask):
-    if not mask.any():
-        return None
-    rows, cols = np.where(mask)
-    return int(rows.min()), int(rows.max()), int(cols.min()), int(cols.max())
 
 def object_info(img):
-    m = object_mask(img)
-    bb = bbox_of(m)
-    if bb is None:
+    m = ~np.isin(img, [BACKGROUND, CANVAS])
+    if not m.any():
         return None
-    r0, r1, c0, c1 = bb
+    rows, cols = np.where(m)
+    r0, r1 = int(rows.min()), int(rows.max())
+    c0, c1 = int(cols.min()), int(cols.max())
     rel = m[r0:r1+1, c0:c1+1]
     vals = img[m]
     uvals, counts = np.unique(vals, return_counts=True)
     color = int(uvals[np.argmax(counts)])
-    return {'mask': m, 'bbox': bb, 'rel_mask': rel, 'color': color, 'anchor': (r0, c0)}
+    return {'rel_mask': rel, 'color': color, 'anchor': (r0, c0)}
 
 
-def shift_matches(q_img, t_img, dr, dc):
-    q_obj = object_mask(q_img); t_obj = object_mask(t_img)
-    q_can = canvas_mask(q_img); t_can = canvas_mask(t_img)
-    H, W = q_img.shape
-    q_obj_s = np.zeros_like(q_obj); q_can_s = np.zeros_like(q_can)
-    src_r0 = max(0, -dr); src_r1 = min(H, H - dr)
-    src_c0 = max(0, -dc); src_c1 = min(W, W - dc)
-    if src_r0 < src_r1 and src_c0 < src_c1:
-        q_obj_s[src_r0+dr:src_r1+dr, src_c0+dc:src_c1+dc] = q_obj[src_r0:src_r1, src_c0:src_c1]
-        q_can_s[src_r0+dr:src_r1+dr, src_c0+dc:src_c1+dc] = q_can[src_r0:src_r1, src_c0:src_c1]
-    both = q_can_s & t_can
-    return np.array_equal(q_obj_s & both, t_obj & both)
+def detect_rule(query_img, target_img, family):
+    """Render-based exact rule detection. Returns 'left6'/'up6'/'rot90ccw'/
+    'rot180', or None if no (completion, rule) combination reproduces the
+    target (should not happen on well-formed data)."""
+    comps = complete_object(query_img, 0 if family == 'translate' else 1)
+    candidates = comps if comps else [None]
+    for rb, lb in FAMILY_BITS[family]:
+        for comp in candidates:
+            out = apply_rule(query_img, rb, lb, completion=comp)
+            if np.array_equal(out, target_img):
+                return BITS_TO_NAME[(rb, lb)]
+    return None
 
 
-def _rotation_try(q_obj, t_obj, q_can, t_can, R0, C0, h, w, k):
-    """Vectorized consistency test for one candidate full bbox + rotation k."""
-    H, W = q_obj.shape
-    ids = np.arange(h * w).reshape(h, w)
-    rot = np.rot90(ids, k=k)
-    nh, nw = rot.shape
-    # dest position (within rotated box) of each source cell id
-    dest = np.empty((h * w, 2), dtype=int)
-    rr, cc = np.divmod(np.arange(nh * nw), nw)
-    dest[rot.ravel()] = np.stack([rr, cc], axis=1)
-
-    i_grid, j_grid = np.divmod(np.arange(h * w), w)
-    src_r = R0 + i_grid; src_c = C0 + j_grid
-    dst_r = R0 + dest[:, 0]; dst_c = C0 + dest[:, 1]
-
-    def sample(mask, r, c):
-        inb = (r >= 0) & (r < H) & (c >= 0) & (c < W)
-        out = np.zeros(len(r), dtype=bool)
-        out[inb] = mask[r[inb], c[inb]]
-        return out, inb
-
-    q_can_v, q_inb = sample(q_can, src_r, src_c)
-    t_can_v, t_inb = sample(t_can, dst_r, dst_c)
-    q_obj_v, _ = sample(q_obj, src_r, src_c)
-    t_obj_v, _ = sample(t_obj, dst_r, dst_c)
-
-    src_known = q_can_v
-    dst_known = t_can_v
-    both = src_known & dst_known
-    if np.any(both & (q_obj_v != t_obj_v)):
-        return False
-
-    # every visible target object pixel must lie in the rotated box
-    tb = bbox_of(t_obj)
-    if tb is not None:
-        tr0, tr1, tc0, tc1 = tb
-        if tr0 < R0 or tr1 > R0 + nh - 1 or tc0 < C0 or tc1 > C0 + nw - 1:
-            return False
-    # every visible query object pixel must lie in the (source) box
-    qb = bbox_of(q_obj)
-    if qb is not None:
-        qr0, qr1, qc0, qc1 = qb
-        if qr0 < R0 or qr1 > R0 + h - 1 or qc0 < C0 or qc1 > C0 + w - 1:
-            return False
-    return True
-
-
-def rotation_matches(q_img, t_img, k_array, max_ext=12):
-    q = object_info(q_img)
-    if q is None:
-        return False
-    q_obj = q['mask']; t_obj = object_mask(t_img)
-    q_can = canvas_mask(q_img); t_can = canvas_mask(t_img)
-    cb = bbox_of(q_can)
-    cr0, cr1, cc0, cc1 = cb
-    vr0, vr1, vc0, vc1 = q['bbox']
-
-    touches = {
-        'b': vr0 == cr0, 't': vr1 == cr1,
-        'l': vc0 == cc0, 'r': vc1 == cc1,
-    }
-    any_touch = any(touches.values())
-    vert_clip = touches['b'] or touches['t']
-    horz_clip = touches['l'] or touches['r']
-
-    # extension allowed on a side if that side is clipped, or if perpendicular
-    # clipping exists (hidden rows/cols can extend the bbox in the other axis)
-    def rng(allowed):
-        return range(0, max_ext + 1) if allowed else [0]
-
-    eb_r = rng(touches['b'] or horz_clip)
-    et_r = rng(touches['t'] or horz_clip)
-    el_r = rng(touches['l'] or vert_clip)
-    er_r = rng(touches['r'] or vert_clip)
-
-    if not any_touch:
-        return _rotation_try(q_obj, t_obj, q_can, t_can, vr0, vc0,
-                             vr1 - vr0 + 1, vc1 - vc0 + 1, k_array)
-
-    for eb in eb_r:
-        R0 = vr0 - eb
-        for et in et_r:
-            R1 = vr1 + et
-            h = R1 - R0 + 1
-            if h > 13:
-                continue
-            for el in el_r:
-                C0 = vc0 - el
-                for er in er_r:
-                    C1 = vc1 + er
-                    w = C1 - C0 + 1
-                    if w > 13:
-                        continue
-                    if _rotation_try(q_obj, t_obj, q_can, t_can, R0, C0, h, w, k_array):
-                        return True
-    return False
-
-
-RULES = ['up6', 'left6', 'rot90ccw', 'rot180']
-FAMILY_RULES = {'translate': ['up6', 'left6'], 'rotate': ['rot90ccw', 'rot180']}
-
-def rule_matches(q_img, t_img, rule):
-    if rule == 'up6':
-        return shift_matches(q_img, t_img, +6, 0)
-    if rule == 'left6':
-        return shift_matches(q_img, t_img, 0, -6)
-    if rule == 'rot90ccw':
-        return rotation_matches(q_img, t_img, 3)
-    if rule == 'rot180':
-        return rotation_matches(q_img, t_img, 2)
-    raise ValueError(rule)
-
-def detect_rule(q_img, t_img, family=None):
-    candidates = FAMILY_RULES[family] if family in FAMILY_RULES else RULES
-    matches = [r for r in candidates if rule_matches(q_img, t_img, r)]
-    if len(matches) == 1:
-        return matches[0], []
-    if len(matches) > 1:
-        return matches[0], matches
-    return None, []
-
-
-def classify_sample(q_img, gen_img, t_img):
-    """
-    1 = gen identical to target
-    2 = same shape as target, followed rule (correct position), wrong color
-    3 = different shape, followed rule (correct position), color ignored
-    4 = same shape, did not follow rule (wrong position), color ignored
-    5 = neither
-    Shape = the object's visible pixel silhouette relative to its bounding box.
-    Position/"followed the rule" = the bbox's image bottom-left corner
-    (array (min_row, min_col)) matches the target's.
-    """
-    if np.array_equal(gen_img, t_img):
+def classify_sample(query_img, gen_img, target_img):
+    if np.array_equal(gen_img, target_img):
         return 1
-    t = object_info(t_img)
+    t = object_info(target_img)
     g = object_info(gen_img)
     if g is None or t is None:
         return 5
@@ -214,21 +99,21 @@ def classify_sample(q_img, gen_img, t_img):
 def analyze_all_results(all_results):
     """
     Returns (categories, rules):
-      categories = {1: [(transform, split, i), ...], ..., 5: [...]}
-      rules      = {(transform, split, i): 'up6'/'left6'/'rot90ccw'/'rot180' or None}
+      categories = {1: [(transform, distance, i), ...], ..., 5: [...]}
+      rules      = {(transform, distance, i): 'left6'/'up6'/'rot90ccw'/'rot180'/None}
     """
-    from collections import defaultdict
     categories = defaultdict(list)
     rules = {}
     for transform in ['translate', 'rotate']:
-        for split in [0, 1, 2]:
-            d = all_results[transform][split]
+        for distance in [0, 1, 2]:
+            d = all_results[transform][distance]
             for i in range(d['gen_idx'].shape[0]):
                 cat = classify_sample(d['query'][i], d['gen_idx'][i], d['target_idx'][i])
-                categories[cat].append((transform, split, i))
-                r, _amb = detect_rule(d['query'][i], d['target_idx'][i], transform)
-                rules[(transform, split, i)] = r
+                categories[cat].append((transform, distance, i))
+                rules[(transform, distance, i)] = detect_rule(
+                    d['query'][i], d['target_idx'][i], transform)
     return dict(categories), rules
+
 
 def categories_to_df(categories):
     num_of_entries = 0
@@ -251,6 +136,19 @@ def categories_to_df(categories):
 @click.argument('saved_models_path', type=click.Path())
 @click.argument('processed_data_path', type=click.Path())
 def main(saved_models_path, processed_data_path):
+    """
+    This will count the different types of errors done on the test data by the OCL.
+    The results should be
+    Category 1 - Fully correct: 1515  (translate 779, rotate 736)
+    Category 2 - Correct shape and rule - Wrong colour: 28  (translate 17, rotate 11)
+    Category 3 - Correct rule - Wrong shape: 1032  (translate 244, rotate 788)
+    Category 4 - Correct shape - Wrong rule: 248  (translate 228, rotate 20)
+    Category 5 - All (shape and rule) Wrong: 3171  (translate 1729, rotate 1442)
+    Rules: Counter({'left6': 1922, 'rot180': 1750, 'rot90ccw': 1247, 'up6': 1075})
+    :param saved_models_path: The folder where the OCL saved model is
+    :param processed_data_path: The folder where the processed data are (data/processed)
+    :return:
+    """
     pickle_file_dir = join(Path(processed_data_path).parent.absolute(), 'results')
     if not Path(pickle_file_dir).exists():
         Path(pickle_file_dir).mkdir(exist_ok=True)
@@ -270,6 +168,18 @@ def main(saved_models_path, processed_data_path):
         print(f"Category {c} - {CATEGORY_DESCRIPTIONS[c-1]}: {len(lst)}  (translate {tcount}, rotate {len(lst) - tcount})")
 
     print("Rules:", Counter(rules.values()))
+    undetected = [k for k, v in rules.items() if v is None]
+    print("Samples with undetected rule:", len(undetected))
+
+    # rule x category cross-table
+    print("\nCategory breakdown per rule:")
+    cross = Counter()
+    cat_of = {s: c for c, lst in categories.items() for s in lst}
+    for k, r in rules.items():
+        cross[(r, cat_of[k])] += 1
+    for r in ['left', 'up', 'rot90', 'rot180']:
+        row = "  ".join(f"cat{c}: {cross.get((r, c), 0):>4}" for c in [1, 2, 3, 4, 5])
+        print(f"  {r:<9} {row}")
 
     with open(join(pickle_file_dir, 'categories.pcl'), 'wb') as f:
         pickle.dump(categories, f)
@@ -277,3 +187,4 @@ def main(saved_models_path, processed_data_path):
 if __name__ == "__main__":
 
     main()
+

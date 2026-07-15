@@ -141,14 +141,13 @@ visualise_saved_data:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_translate/test_d2.npz data/results/translate/figures/test_d2 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/visualization/visualise_training_data_sets.py data/processed/compositional_rotate/test_d2.npz data/results/rotate/figures/test_d2 $(NUM_TEST_SET_IMAGES_TO_VISUALISE)
 
-## Create the Figure 3 image of the error curves
+## Create the Figure 3 image of the error curves without the OCL
 visualise_result_curves:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_3_results.py data/results  data/results 8
 
-## Create the Figure 4 image of the OCL error curves
+## Create the OCL error curves to add to Figure 3
 visualise_ocl_result_curves:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_4_ocl_results.py data/results/translate/arcpairs/compositional_translate_ours_0/events.out.tfevents.1782798734.cseeblg2.1712846.0  data/results/rotate/arcpairs/compositional_rotate_ours_0/events.out.tfevents.1782798763.cseeblg2.1712935.0 data/results data/results 8
-
 
 visualise_ocl_test_data:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=$(CUDA_VISIBLE_DEVICE)$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/ocl_all_test_data_images.py saved_models data/processed
@@ -164,6 +163,9 @@ visualise_all_models_for_some_samples:
 ## Create images showing the copying of pixels from the first N samples of both networks on both data sets over all distances
 visualise_copying:
 	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/experiments/analysis/scripts_for_images/figure_5_copy_visualisations.py 100 saved_models data/processed data/results
+
+metric_validation:
+	$(SET_CMD) CUDA_VISIBLE_DEVICES=""$(AND_CMD) $(SET_CMD) PYTHONPATH=./src$(AND_CMD) $(PYTHON_INTERPRETER) src/metrics/metric_validation.py data/processed
 
 ## Delete all compiled Python files
 clean:

@@ -12,13 +12,13 @@ translate_path = f5.translate_path
 rotate_path = f5.rotate_path
 final_layer = f5.final_layers
 
-def load_data(model_index, data_type, distance):
+def load_data(data_path:str, saved_models_path:str, model_index, data_type, distance):
     num_of_samples = 100
-    model_base_path = 'saved_models'
-    data_base_path = 'data/processed'
+    model_base_path = saved_models_path
+    data_base_path = join(data_path, 'processed')
 
     data_type_path = translate_path if data_type == 'translate' else rotate_path
-    vis_arrays_output_path = 'data/results'
+    vis_arrays_output_path = join(data_path, 'results')
     data_filepath = join(data_base_path, data_type_path, f'test_d{distance}.npz')
 
     X, Z, Y = nn_funcs.load_data(data_filepath)
@@ -61,15 +61,17 @@ def get_non_compositional_errors(data_type, distance, X, Y, Z, copied_from_pixel
     :param distance: 0, 1, 2 the OOD distance
     :param X: The input images to the APN model
     :param Y: The correct output of the transformation
-    :param Z: The transformation (0 or 1)
+    :param Z:  (0 or 1)
     :param copied_from_pixel_indices_all_images: The result of the final layer of the APNs. It shows (for each x and y)
                                                  which pixel from x was copied to the y_hat image.
     :return: 1) the indices of the images (not all images generate an error). 2) The rmse of the pixels that comprise
              the moving object. 3) The rmse of the pixels that comprise the rest of the picture. 4) The rmse of the
              pixels not in the object if the move was random and not defined by the APNs final hidden layer.
     """
-    images_where_there_is_no_object_in_Y = {'translate': {0: [62, 94], 1: [12, 23, 31, 59, 72], 2: []},
-                                            'rotate': {0: [], 1: [], 2: []}}
+    #images_where_there_is_no_object_in_Y = {'translate': {0: [62, 94], 1: [12, 23, 31, 59, 72], 2: []},
+    #                                        'rotate': {0: [], 1: [], 2: []}}
+    empty_indices = [i for i in range(len(Y)) if not (~np.isin(Y[i], [0, 1])).any()]
+    images_where_there_is_no_object_in_Y = {data_type: {distance: empty_indices}}
     random_copied_from_pixels_indices = np.random.randint(low=0, high=31,
                                                                   size=copied_from_pixel_indices_all_images.shape)
     object_pixels_errors = []
@@ -156,7 +158,7 @@ def get_non_compositional_errors(data_type, distance, X, Y, Z, copied_from_pixel
     return (np.array(image_indices), np.array(object_pixels_errors),
             np.array(other_pixels_errors), random_error)
 
-def get_errors_for_all_models_types_and_distances():
+def get_errors_for_all_models_types_and_distances(data_path:str, saved_models_path:str):
 
     all_image_indices = []
     all_object_pixels_errors = []
@@ -167,7 +169,7 @@ def get_errors_for_all_models_types_and_distances():
         for data_type in ['translate', 'rotate']:
             for distance in [0, 1, 2]:
                 print(f'Model: {model_index}, Type: {data_type}, Distance: {distance}')
-                X, Z, Y, copied_from_pixel_indices_all_images = load_data(model_index, data_type, distance)
+                X, Z, Y, copied_from_pixel_indices_all_images = load_data(data_path, saved_models_path, model_index, data_type, distance)
                 image_indices, object_pixels_errors, other_pixels_errors, random_error = \
                     get_non_compositional_errors(data_type, distance, X, Y, Z, copied_from_pixel_indices_all_images)
 
@@ -181,52 +183,52 @@ def get_errors_for_all_models_types_and_distances():
     return all_labels, all_image_indices, all_object_pixels_errors, all_other_pixels_errors, all_random_errors
 
 
+def main(data_path: str, saved_models_path: str):
+
+    all_labels, all_image_indices, all_object_pixels_errors, all_other_pixels_errors, all_random_errors = \
+        get_errors_for_all_models_types_and_distances(data_path, saved_models_path)
+
+    mean_object_error = []
+    std_object_error = []
+    mean_non_object_error = []
+    std_non_object_error = []
+
+    for i in range(len(all_labels)):
+        mean_object_error.append(np.mean(all_object_pixels_errors[i]) / np.mean(all_random_errors[i]))
+        mean_non_object_error.append(np.mean(all_other_pixels_errors[i]) / np.mean(all_random_errors[i]))
+        std_object_error.append(np.std(all_object_pixels_errors[i]))
+        std_non_object_error.append(np.std(all_other_pixels_errors[i]))
 
 
-all_labels, all_image_indices, all_object_pixels_errors, all_other_pixels_errors, all_random_errors = \
-    get_errors_for_all_models_types_and_distances()
+    fig, (ax_o, ax_no) = plt.subplots(nrows=2, sharex=True)
+    bottom = 0
+    p1 = ax_o.bar(all_labels, height=mean_object_error, bottom=bottom)
+    p2 = ax_no.bar(all_labels, height=mean_non_object_error, bottom=bottom)
+    ax_no.tick_params(axis='x', labelrotation=90, labelsize=35)
+    ax_no.set_xlabel('Model, Type, Distance', {'size': 60})
+    ax_o.set_ylim(0, 0.5)
+    ax_no.set_ylim(0, 0.5)
+    ax_no.tick_params(axis='y', labelsize=40)
+    ax_o.tick_params(axis='y', labelsize=40)
 
 
-mean_object_error = []
-std_object_error = []
-mean_non_object_error = []
-std_non_object_error = []
+    '''
+    from matplotlib.patches import FancyArrowPatch, ArrowStyle
 
-for i in range(len(all_labels)):
-    mean_object_error.append(np.mean(all_object_pixels_errors[i]) / np.mean(all_random_errors[i]))
-    mean_non_object_error.append(np.mean(all_other_pixels_errors[i]) / np.mean(all_random_errors[i]))
-    std_object_error.append(np.std(all_object_pixels_errors[i]))
-    std_non_object_error.append(np.std(all_other_pixels_errors[i]))
+    fig, ax = plt.subplots()
+    arrow_style = ArrowStyle.Simple(head_length=.8, head_width=.8, tail_width=.2)
+    for o, no in zip(mean_object_error, mean_non_object_error):
+        arrow = FancyArrowPatch((0, 0), (no, o), arrowstyle=arrow_style, mutation_scale=20)
+        ax.add_patch(arrow)
+    ax.set_xlim(-0.1, 1)
+    ax.set_ylim(-0.1, 1)
+    
+    model_index = 0
+    data_type = 'rotate'
+    distance = 1
 
-
-fig, (ax_o, ax_no) = plt.subplots(nrows=2, sharex=True)
-bottom = 0
-p1 = ax_o.bar(all_labels, height=mean_object_error, bottom=bottom)
-p2 = ax_no.bar(all_labels, height=mean_non_object_error, bottom=bottom)
-ax_no.tick_params(axis='x', labelrotation=90, labelsize=35)
-ax_no.set_xlabel('Model, Type, Distance', {'size': 60})
-ax_o.set_ylim(0, 0.5)
-ax_no.set_ylim(0, 0.5)
-ax_no.tick_params(axis='y', labelsize=40)
-ax_o.tick_params(axis='y', labelsize=40)
-
-
-from matplotlib.patches import FancyArrowPatch, ArrowStyle
-
-fig, ax = plt.subplots()
-arrow_style = ArrowStyle.Simple(head_length=.8, head_width=.8, tail_width=.2)
-for o, no in zip(mean_object_error, mean_non_object_error):
-    arrow = FancyArrowPatch((0, 0), (no, o), arrowstyle=arrow_style, mutation_scale=20)
-    ax.add_patch(arrow)
-ax.set_xlim(-0.1, 1)
-ax.set_ylim(-0.1, 1)
-
-
-
-model_index = 0
-data_type = 'rotate'
-distance = 1
-X, Z, Y, copied_from_pixel_indices_all_images = load_data(model_index, data_type, distance)
-image_indices,  object_pixels_errors, other_pixels_errors, random_error = get_non_compositional_errors(data_type, distance, X, Y, Z, copied_from_pixel_indices_all_images)
-plt.plot(image_indices, object_pixels_errors, image_indices, other_pixels_errors, image_indices, random_error[image_indices])
-plt.legend(('object', 'other', 'random'))
+    X, Z, Y, copied_from_pixel_indices_all_images = load_data(data_path, saved_models_path, model_index, data_type, distance)
+    image_indices,  object_pixels_errors, other_pixels_errors, random_error = get_non_compositional_errors(data_type, distance, X, Y, Z, copied_from_pixel_indices_all_images)
+    plt.plot(image_indices, object_pixels_errors, image_indices, other_pixels_errors, image_indices, random_error[image_indices])
+    plt.legend(('object', 'other', 'random'))
+    '''

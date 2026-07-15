@@ -127,11 +127,12 @@ def get_ocl_results(saved_models_path: str,  processed_data_path: str, data_type
         for distance in distances:
             loader = data_loader[distance]
 
-            support_all, query_all, gen_idx_all, target_idx_all = [], [], [], []
+            support_all, query_all, gen_idx_all, target_idx_all, images_all, atten_all = [], [], [], [], [], []
 
             for i, images in enumerate(loader):
                 print('    ', distance, i)
                 images = images.to(device, non_blocking=True)
+                B, N, _, C, H, W = images.shape
                 # support = all pairs except the last; query input = A of the last pair
                 support = images[:, :-1]  # (B, N, 2, C, H, W)
                 query = images[:, -1, 0]  # (B, C, H, W)
@@ -154,11 +155,19 @@ def get_ocl_results(saved_models_path: str,  processed_data_path: str, data_type
                 gen_idx_all.append(gen_idx)
                 target_idx_all.append(target_idx)
 
+                _, _, _, attns = model(images[:, :-1], images[:, -1], args.tau, args.hard)
+                attns_cpu = attns.detach().clone().cpu()
+                attns_cpu = attns_cpu.reshape((B, 2*N, args.num_slots, C, H, W))
+                atten_all.append(attns_cpu)
+                images_all.append(images.detach().clone().cpu())
+
             results[transl_or_rot][distance] = {
-                'support': torch.cat(support_all, dim=0).numpy(),  # (999, N-1, 2, C, H, W)
-                'query': torch.cat(query_all, dim=0).numpy(),  # (999, C, H, W)
-                'gen_idx': torch.cat(gen_idx_all, dim=0).numpy(),  # (999, H, W)
-                'target_idx': torch.cat(target_idx_all, dim=0).numpy(),  # (999, H, W)
+                'support': torch.cat(support_all, dim=0).numpy(),  # (B=999, N-1=2, 2(each pair), C=3, H=32, W=32)
+                'query': torch.cat(query_all, dim=0).numpy(),  # (B, C, H, W)
+                'gen_idx': torch.cat(gen_idx_all, dim=0).numpy(),  # (B, H, W)
+                'target_idx': torch.cat(target_idx_all, dim=0).numpy(),  # (B, H, W)
+                'images': torch.cat(images_all, dim=0).numpy(), # (B, N=3(# of pairs), 2(each pair), C, H, W)
+                'attention_slots': torch.cat(atten_all, dim=0).numpy() # (B, N * 2(each pair), num_slots, C, H, W)
             }
 
     return results
